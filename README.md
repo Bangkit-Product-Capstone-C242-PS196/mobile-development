@@ -1,7 +1,7 @@
 # Mobile Development
 
 ## Path: Mobile Development
-Mobile Development is a learning and development path focused on creating mobile applications using Android technology, Jetpack Compose, and best development practices.
+Mobile Development is a learning and development path focused on creating mobile applications using Android technology and best development practices.
 
 ---
 
