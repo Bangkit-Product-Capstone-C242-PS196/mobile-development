@@ -1,6 +1,4 @@
-package com.example.monev.ui.screens.home
-
-import androidx.compose.material3.Button
+package com.example.monev.ui.screens.account
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,13 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.example.monev.ui.navigation.Destinations
 
 @Composable
-fun HomeScreen(
+fun AccountScreen(
     modifier: Modifier = Modifier,
     navController: NavController
-
 ) {
     Column (
         verticalArrangement = Arrangement.Center,
@@ -25,17 +21,8 @@ fun HomeScreen(
             .fillMaxSize()
     ) {
         Text(
-            text = "Home Screen"
+            text = "Account Screen"
         )
-        Button(
-            onClick = {
-                navController.navigate(Destinations.SettingScreen.route)
-            }
-        ) {
-            Text(
-                text = "ggo setting screen"
-            )
-        }
     }
 
 }

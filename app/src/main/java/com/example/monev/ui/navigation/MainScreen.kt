@@ -1,39 +1,34 @@
-package com.example.monev.ui.screens.home
-
-import androidx.compose.material3.Button
+package com.example.monev.ui.navigation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.example.monev.ui.navigation.Destinations
 
 @Composable
-fun HomeScreen(
+fun MainScreen(
     modifier: Modifier = Modifier,
     navController: NavController
 
 ) {
     Column (
+        modifier =  Modifier
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Home Screen"
-        )
         Button(
             onClick = {
-                navController.navigate(Destinations.SettingScreen.route)
+                navController.navigate(Destinations.HomeScreen.route)
             }
         ) {
             Text(
-                text = "ggo setting screen"
+                text = "go home Screen"
             )
         }
     }
