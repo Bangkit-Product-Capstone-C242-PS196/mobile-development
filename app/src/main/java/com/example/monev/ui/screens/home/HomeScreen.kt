@@ -46,4 +46,9 @@ fun HomeScreen(
             Text(text = "Open Camera")
         }
     }
+    Button(onClick = {
+        navController.navigate(Destinations.ChatbotScreen.route)
+    }) {
+        Text(text = "Open Chatbot")
+    }
 }
