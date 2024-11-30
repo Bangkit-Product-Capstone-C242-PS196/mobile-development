@@ -16,6 +16,7 @@ import com.example.monev.ui.screens.account.AccountScreen
 import com.example.monev.ui.screens.home.HomeScreen
 import com.example.monev.ui.screens.setting.SettingScreen
 import com.example.monev.ui.screens.welcome.WelcomeScreen
+import com.example.monev.ui.screens.camera.CameraScreen
 
 
 
@@ -75,6 +76,11 @@ fun Navigation(modifier: Modifier = Modifier) {
             // AccountScreen (tanpa BottomBar)
             composable(Destinations.AccountScreen.route) {
                 AccountScreen(navController = navController)
+            }
+
+            //CameraScreen (tanpa BottomBar)
+            composable(Destinations.CameraScreen.route) {
+                CameraScreen(navController = navController)
             }
         }
     }

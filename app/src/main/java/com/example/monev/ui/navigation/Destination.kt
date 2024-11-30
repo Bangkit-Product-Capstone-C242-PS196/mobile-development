@@ -5,4 +5,5 @@ sealed class Destinations (val route: String) {
     data object HomeScreen: Destinations("HomeScreen")
     data object AccountScreen: Destinations("AccountScreen")
     data object SettingScreen: Destinations("SettingScreen")
+    data object CameraScreen: Destinations("CameraScreen")
 }

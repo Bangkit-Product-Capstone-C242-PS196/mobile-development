@@ -36,6 +36,15 @@ fun HomeScreen(
                 text = "ggo setting screen"
             )
         }
+        Button(
+            onClick = {
+                navController.navigate(Destinations.CameraScreen.route)
+            }
+        ) {
+            Text(
+                text = "Camera"
+            )
+        }
     }
 
 }
