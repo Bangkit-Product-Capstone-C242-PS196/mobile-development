@@ -76,6 +76,9 @@ fun Navigation(modifier: Modifier = Modifier) {
             composable(Destinations.AccountScreen.route) {
                 AccountScreen(navController = navController)
             }
+            composable(Destinations.ChatbotScreen.route) {
+                com.example.monev.ui.screens.chatbot.ChatbotScreen()
+            }
         }
     }
 }
