@@ -47,7 +47,7 @@ fun ChatbotScreen() {
     val tts = remember { TextToSpeech(context) { } }
     val generativeModel = GenerativeModel(
         modelName = "gemini-pro",
-        apiKey = "AIzaSyCe0rxd9FWYWKeEHIUQaWXekx2wJYdza3s"
+        apiKey = "keymu kang"
     )
 
     val predefinedPrompts = mapOf(
