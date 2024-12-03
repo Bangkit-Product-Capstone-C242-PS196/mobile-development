@@ -1,5 +1,6 @@
 package com.example.monev.ui.screens.setting
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -21,10 +22,15 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings", style = MaterialTheme.typography.titleLarge) }
+                title = { Text("Settings", style = MaterialTheme.typography.titleLarge, color = colorScheme.onPrimary) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorScheme.primary
+                )
             )
         }
     ) { paddingValues ->
@@ -32,48 +38,52 @@ fun SettingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(colorScheme.background)
         ) {
             SettingListItem(
                 icon = Icons.Default.Person,
                 title = "Account",
                 description = "Privacy, security, change email or number",
                 onClick = {
-                    // Navigasi ke AccountScreen
                     navController.navigate(Destinations.AccountScreen.route)
-                }
+                },
+                colorScheme = colorScheme
             )
             SettingListItem(
                 icon = Icons.Default.Person,
                 title = "Chats",
                 description = "Theme, wallpapers, chat history",
                 onClick = {
-                    // Navigasi ke ChatScreen (buat jika ada)
                     navController.navigate(Destinations.HomeScreen.route)
-                }
+                },
+                colorScheme = colorScheme
             )
             SettingListItem(
                 icon = Icons.Default.Notifications,
                 title = "Notifications",
                 description = "Message, group & call tones",
                 onClick = {
-                    // Tambahkan logika navigasi atau fungsi lain di sini
-                }
+                    // Add navigation logic or other functions here
+                },
+                colorScheme = colorScheme
             )
             SettingListItem(
                 icon = Icons.Default.Person,
                 title = "Storage and data",
                 description = "Network usage, auto-download",
                 onClick = {
-                    // Logika untuk Storage
-                }
+                    // Logic for Storage
+                },
+                colorScheme = colorScheme
             )
             SettingListItem(
                 icon = Icons.Default.Person,
                 title = "Help",
                 description = "Help centre, contact us, privacy policy",
                 onClick = {
-                    // Navigasi atau logika tambahan untuk Help
-                }
+                    // Additional navigation or logic for Help
+                },
+                colorScheme = colorScheme
             )
         }
     }
@@ -84,7 +94,8 @@ fun SettingListItem(
     icon: ImageVector,
     title: String,
     description: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    colorScheme: ColorScheme
 ) {
     Row(
         modifier = Modifier
@@ -96,17 +107,20 @@ fun SettingListItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
+            tint = colorScheme.onBackground
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                color = colorScheme.onBackground
             )
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp)
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                color = colorScheme.onBackground
             )
         }
     }

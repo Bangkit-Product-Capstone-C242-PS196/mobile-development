@@ -35,6 +35,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.util.Locale
 import androidx.compose.material.icons.filled.Person
+import com.example.monev.BuildConfig
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.ai.client.generativeai.type.ResponseStoppedException
 
@@ -51,7 +52,7 @@ fun ChatbotScreenDua() {
     // Initialize Gemini API client
     val generativeModel = GenerativeModel(
         modelName = "gemini-pro",
-        apiKey = "AIzaSyCe0rxd9FWYWKeEHIUQaWXekx2wJYdza3s"
+        apiKey = BuildConfig.API_KEY
     )
 
     fun sendMessage() {

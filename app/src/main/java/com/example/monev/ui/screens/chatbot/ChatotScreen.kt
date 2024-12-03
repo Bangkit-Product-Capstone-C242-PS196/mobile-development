@@ -3,44 +3,42 @@ package com.example.monev.ui.screens.chatbot
 import android.app.Activity
 import android.content.Intent
 import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.GenerateContentResponse
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
-import com.google.ai.client.generativeai.type.GenerateContentResponse
-import androidx.compose.animation.core.*
-import androidx.compose.ui.draw.alpha
-import com.google.ai.client.generativeai.BuildConfig
+import com.example.monev.BuildConfig
 
 @Composable
 fun ChatbotScreen() {
     val context = LocalContext.current
+    val colorScheme = MaterialTheme.colorScheme
 
     // Initialize Text-to-Speech setup
     val tts = remember { TextToSpeech(context) { } }
 
     // Initialize SpeechRecognizer
-    val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
     val speechRecognizerIntent = remember {
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -48,23 +46,58 @@ fun ChatbotScreen() {
         }
     }
 
-    // Variable for animation while bot is speaking
+    // State variables for more dynamic interactions
+    var isListening by remember { mutableStateOf(false) }
     var isSpeaking by remember { mutableStateOf(false) }
+    var isProcessing by remember { mutableStateOf(false) }
 
-    // Animations for "wave" effect
-    val size by animateDpAsState(
-        targetValue = if (isSpeaking) 170.dp else 150.dp, // Increase size during speech
+    // Advanced color animation
+    val colorTransition = rememberInfiniteTransition(label = "")
+    val color1 by colorTransition.animateColor(
+        initialValue = colorScheme.primary,
+        targetValue = colorScheme.secondary,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        )
+            animation = tween(3000),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
     )
-    val opacity by animateFloatAsState(
-        targetValue = if (isSpeaking) 0.6f else 1f, // Opacity decreases when speaking
+
+    val color2 by colorTransition.animateColor(
+        initialValue = colorScheme.secondary,
+        targetValue = colorScheme.tertiary,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        )
+            animation = tween(4000, delayMillis = 1000),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    val color3 by colorTransition.animateColor(
+        initialValue = colorScheme.tertiary,
+        targetValue = colorScheme.primary,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3500, delayMillis = 2000),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    // Advanced animations for more fluid interactions
+    val breathingAnimation = rememberInfiniteTransition(label = "")
+    val size by breathingAnimation.animateFloat(
+        initialValue = 150f,
+        targetValue = 180f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    val scaleAnimation by breathingAnimation.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
     )
 
     // Launcher for Speech Input
@@ -72,26 +105,28 @@ fun ChatbotScreen() {
         if (result.resultCode == Activity.RESULT_OK) {
             val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             if (!matches.isNullOrEmpty()) {
-                // If there's a match, speak the result using TextToSpeech
+                isListening = false
+                isProcessing = true
+
                 val userInput = matches[0]
                 val prompt = "Kau adalah seorang developer aplikasi monev. Aplikasi yang bertujuan untuk tunanetra dalam melakukan scan nilai mata uang melalui kamera. Client bertanya: \"$userInput\""
 
-                // Menggunakan API Gemini untuk menghasilkan response dengan prompt yang disesuaikan
                 MainScope().launch {
                     try {
-                        // Menggunakan API Gemini untuk menghasilkan response
                         val aiResponse: GenerateContentResponse = generativeModel.generateContent(prompt)
                         val aiText = aiResponse.text?.replace("*", "") ?: "Maaf, saya tidak dapat menghasilkan respons."
 
-                        // Menyuarakan response menggunakan TTS
-                        isSpeaking = true // Start animation when bot is speaking
+                        isProcessing = false
+                        isSpeaking = true
+
                         tts.speak(aiText, TextToSpeech.QUEUE_FLUSH, null, null)
 
-                        // After TTS finishes speaking, stop the animation
-                        delay(aiText.length * 100L) // Wait for approximate duration of the speech
+                        // Automatically stop speaking after text is complete
+                        delay(aiText.length * 100L)
                         isSpeaking = false
 
                     } catch (e: Exception) {
+                        isProcessing = false
                         val errorMessage = "Terjadi kesalahan: ${e.message}"
                         tts.speak(errorMessage, TextToSpeech.QUEUE_FLUSH, null, null)
                     }
@@ -100,64 +135,47 @@ fun ChatbotScreen() {
         }
     }
 
-    // Layout
+    // Main Layout
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF1A1A1A),
-                        Color(0xFF121212)
-                    )
-                )
-            )
+            .background(colorScheme.background)
     ) {
-        // Centering the button in the middle of the screen
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            // The large button to trigger speech input
+            // Interactive Central Button
             Box(
                 modifier = Modifier
-                    .size(size) // Use the animated size here
-                    .alpha(opacity) // Use animated opacity here
+                    .size(size.dp)
+                    .scale(if (!isListening && !isSpeaking && !isProcessing) scaleAnimation else 1f)
                     .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                Color(0xFF4285F4),
-                                Color(0xFF34A853)
-                            )
+                        brush = Brush.sweepGradient(
+                            colors = listOf(color1, color2, color3, color1)
                         ),
                         shape = CircleShape
                     )
+                    .clip(CircleShape)
                     .clickable {
-                        // Stop current speaking before handling new user input
+                        // Reset all states
                         tts.stop()
+                        isListening = false
+                        isSpeaking = false
+                        isProcessing = false
 
-                        // Play notification sound indicating that the microphone is active
+                        // Prepare for speech input
                         tts.speak("Mikrofon aktif. Silakan berbicara.", TextToSpeech.QUEUE_FLUSH, null, null)
 
-                        // Add a small delay before starting the microphone recording
                         MainScope().launch {
-                            delay(3000) // Wait for 2 seconds to allow the TTS message to finish
-
-                            // Launch speech input after delay
+                            delay(2000)
+                            isListening = true
                             speechLauncher.launch(speechRecognizerIntent)
                         }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = "Voice Input",
-                    tint = Color.White,
-                    modifier = Modifier.size(80.dp) // Adjust icon size for better visibility
-                )
-            }
+                    }
+            )
         }
     }
 }
@@ -165,5 +183,5 @@ fun ChatbotScreen() {
 // Initialize Gemini API client
 val generativeModel = GenerativeModel(
     modelName = "gemini-pro",
-    apiKey = ""
+    apiKey = BuildConfig.API_KEY
 )
