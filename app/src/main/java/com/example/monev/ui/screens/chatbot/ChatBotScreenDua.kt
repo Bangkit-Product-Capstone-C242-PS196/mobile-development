@@ -34,34 +34,33 @@ import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.util.Locale
-import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Person
+import com.example.monev.BuildConfig
+import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.ai.client.generativeai.type.ResponseStoppedException
 
 @Composable
-fun ChatbotScreen() {
+fun ChatbotScreenDua() {
     var userInput by remember { mutableStateOf("") }
     var messages by remember { mutableStateOf(listOf<Message>()) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
 
+    // Text-to-Speech setup
     val tts = remember { TextToSpeech(context) { } }
+
+    // Initialize Gemini API client
     val generativeModel = GenerativeModel(
         modelName = "gemini-pro",
-        apiKey = "keymu kang"
+        apiKey = BuildConfig.API_KEY
     )
 
-    val predefinedPrompts = mapOf(
-        "Hello" to "Hi there! How can I help you today?",
-        "How are you?" to "I'm an AI, so I don't have feelings, but thanks for asking!",
-        "What is your name?" to "I am Gemini AI, your virtual assistant."
-    )
-    fun generateResponse(prompt: String): String {
-        return predefinedPrompts[prompt] ?: "I'm sorry, I don't understand that prompt."
-    }
     fun sendMessage() {
         if (userInput.isNotEmpty()) {
-            val prompt = userInput
-            messages = messages + Message(prompt, MessageType.USER)
+            // Menggabungkan input pengguna dengan prompt khusus dalam bahasa Indonesia
+            val prompt = "Kau adalah seorang developer aplikasi monev. Aplikasi yang bertujuan untuk tunanetra dalam melakukan scan nilai mata uang melalui kamera, yang nanti akan memberikan suara untuk nominal mata uang yang discan, sehingga memudahkan dalam jual beli dan memvalidasi nilai mata uang para tunanetra. kau selalu merespon pertanyaan client dengan singkat dan sesuai pengtahuanmu mengenai monev. jika user mengajukan pertanyaan diluar monev, ya tetep kau jawab sesuai pengetahuan yang ada gausah dibatasi mengenai monev doang. untuk menggunakannya cukup akses ikon kamera di tengah layar di halaman beranda, lalu foto uang dan akan muncul suara  nominal uang itu  .Client bertanya: \"$userInput\""
+
+            messages = messages + Message(userInput, MessageType.USER)
             userInput = ""
 
             MainScope().launch {
@@ -69,17 +68,29 @@ fun ChatbotScreen() {
                     if (tts.isSpeaking) {
                         tts.stop()
                     }
-                    val aiResponse = generateResponse(prompt)
-                    messages = messages + Message(aiResponse, MessageType.AI)
-                    tts.speak(aiResponse, TextToSpeech.QUEUE_FLUSH, null, null)
+
+                    // Menggunakan API Gemini untuk menghasilkan response dengan prompt yang disesuaikan
+                    val aiResponse: GenerateContentResponse = generativeModel.generateContent(prompt)
+
+                    // Mengakses properti 'text' untuk mendapatkan konten yang dihasilkan
+                    val aiText = aiResponse.text ?: "Maaf, saya tidak dapat menghasilkan respons."
+
+                    // Menambahkan respons dari AI ke dalam pesan
+                    messages = messages + Message(aiText, MessageType.AI)
+                    tts.speak(aiText, TextToSpeech.QUEUE_FLUSH, null, null)
                 } catch (e: ResponseStoppedException) {
-                    val warningMessage = "Content generation stopped due to safety reasons."
+                    val warningMessage = "Pembuatan konten dihentikan karena alasan keamanan."
                     messages = messages + Message(warningMessage, MessageType.AI)
                     tts.speak(warningMessage, TextToSpeech.QUEUE_FLUSH, null, null)
+                } catch (e: Exception) {
+                    val errorMessage = "Terjadi kesalahan: ${e.message}"
+                    messages = messages + Message(errorMessage, MessageType.AI)
+                    tts.speak(errorMessage, TextToSpeech.QUEUE_FLUSH, null, null)
                 }
             }
         }
     }
+
 
     val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
     val speechRecognizerIntent = remember {
@@ -97,6 +108,8 @@ fun ChatbotScreen() {
             }
         }
     }
+
+
 
     Box(
         modifier = Modifier
@@ -224,7 +237,7 @@ fun ChatbotScreen() {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        Icons.Default.Mic,
+                        Icons.Default.Person,
                         contentDescription = "Voice Input",
                         tint = Color.White
                     )
