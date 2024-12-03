@@ -16,6 +16,8 @@ import com.example.monev.ui.screens.account.AccountScreen
 import com.example.monev.ui.screens.home.HomeScreen
 import com.example.monev.ui.screens.setting.SettingScreen
 import com.example.monev.ui.screens.welcome.WelcomeScreen
+import com.example.monev.ui.screens.chatbot.ChatbotScreen
+
 
 
 
@@ -27,7 +29,8 @@ fun Navigation(modifier: Modifier = Modifier) {
     // Rute yang membutuhkan BottomBar
     val screensWithBottomBar = listOf(
         Destinations.HomeScreen.route,
-        Destinations.SettingScreen.route
+        Destinations.SettingScreen.route,
+        Destinations.ChatbotScreen.route,
     )
 
     // State untuk menyimpan rute saat ini
@@ -77,7 +80,7 @@ fun Navigation(modifier: Modifier = Modifier) {
                 AccountScreen(navController = navController)
             }
             composable(Destinations.ChatbotScreen.route) {
-                com.example.monev.ui.screens.chatbot.ChatbotScreen()
+                ChatbotScreen(navController = navController)
             }
         }
     }

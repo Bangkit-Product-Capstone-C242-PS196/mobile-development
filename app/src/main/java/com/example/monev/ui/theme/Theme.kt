@@ -41,7 +41,7 @@ private val lightScheme = lightColorScheme(
     scrim = scrimLight,
     inverseSurface = inverseSurfaceLight,
     inverseOnSurface = inverseOnSurfaceLight,
-    inversePrimary = inversePrimaryLight
+    inversePrimary = inversePrimaryLight,
 )
 
 private val darkScheme = darkColorScheme(
@@ -72,7 +72,7 @@ private val darkScheme = darkColorScheme(
     scrim = scrimDark,
     inverseSurface = inverseSurfaceDark,
     inverseOnSurface = inverseOnSurfaceDark,
-    inversePrimary = inversePrimaryDark
+    inversePrimary = inversePrimaryDark,
 )
 
 private val mediumContrastLightColorScheme = lightColorScheme(

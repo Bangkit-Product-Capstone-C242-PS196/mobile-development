@@ -7,6 +7,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -21,10 +22,12 @@ import androidx.compose.runtime.remember as remember1
 fun MyBottomBar(
     navController: NavController
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     val selectedRoute = remember1 { mutableStateOf(Destinations.HomeScreen.route) }
 
     NavigationBar(
-        containerColor = Color(0xFFF3F4F9),
+        containerColor = colorScheme.primary,
         tonalElevation = 8.dp
     ) {
         // Home Item
@@ -49,10 +52,10 @@ fun MyBottomBar(
                 )
             },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                selectedTextColor = Color.Black,
-                unselectedIconColor = Color.Black,
-                unselectedTextColor = Color.Black
+                selectedIconColor = colorScheme.onPrimaryContainer,
+                selectedTextColor = colorScheme.scrim,
+                unselectedIconColor = colorScheme.scrim,
+                unselectedTextColor = colorScheme.scrim
             )
         )
 
@@ -68,7 +71,7 @@ fun MyBottomBar(
             icon = {
                 Icon(
                     imageVector = Icons.Default.Face,
-                    contentDescription = "Settings"
+                    contentDescription = "Chatbot"
                 )
             },
             label = {
@@ -78,10 +81,10 @@ fun MyBottomBar(
                 )
             },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                selectedTextColor = Color.Black,
-                unselectedIconColor = Color.Black,
-                unselectedTextColor = Color.Black
+                selectedIconColor = colorScheme.onPrimaryContainer,
+                selectedTextColor = colorScheme.scrim,
+                unselectedIconColor = colorScheme.scrim,
+                unselectedTextColor = colorScheme.scrim
             )
         )
 
@@ -107,10 +110,10 @@ fun MyBottomBar(
                 )
             },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                selectedTextColor = Color.Black,
-                unselectedIconColor = Color.Black,
-                unselectedTextColor = Color.Black
+                selectedIconColor = colorScheme.onPrimaryContainer,
+                selectedTextColor = colorScheme.scrim,
+                unselectedIconColor = colorScheme.scrim,
+                unselectedTextColor = colorScheme.scrim
             )
         )
     }

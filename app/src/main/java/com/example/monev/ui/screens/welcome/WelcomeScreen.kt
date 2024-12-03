@@ -28,6 +28,7 @@ fun WelcomeScreen(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     Box(
+
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.primary)

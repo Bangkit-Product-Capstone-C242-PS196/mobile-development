@@ -1,5 +1,6 @@
 package com.example.monev.ui.screens.chatbot
 
+import MyBottomBar
 import android.app.Activity
 import android.content.Intent
 import android.speech.RecognizerIntent
@@ -12,7 +13,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,7 +27,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import kotlinx.coroutines.MainScope
@@ -30,8 +39,9 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import com.example.monev.BuildConfig
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatbotScreen() {
+fun ChatbotScreen(navController: NavController) {
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
 
@@ -136,46 +146,74 @@ fun ChatbotScreen() {
     }
 
     // Main Layout
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorScheme.background)
-    ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "CHATBOT",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = colorScheme.onPrimaryContainer,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorScheme.background
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 20.dp)
+            )
+        }
+    ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
+                .padding(innerPadding)
+                .background(colorScheme.background)
         ) {
-            // Interactive Central Button
             Box(
                 modifier = Modifier
-                    .size(size.dp)
-                    .scale(if (!isListening && !isSpeaking && !isProcessing) scaleAnimation else 1f)
-                    .background(
-                        brush = Brush.sweepGradient(
-                            colors = listOf(color1, color2, color3, color1)
-                        ),
-                        shape = CircleShape
-                    )
-                    .clip(CircleShape)
-                    .clickable {
-                        // Reset all states
-                        tts.stop()
-                        isListening = false
-                        isSpeaking = false
-                        isProcessing = false
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // Interactive Central Button
+                Box(
+                    modifier = Modifier
+                        .size(size.dp)
+                        .scale(if (!isListening && !isSpeaking && !isProcessing) scaleAnimation else 1f)
+                        .background(
+                            brush = Brush.sweepGradient(
+                                colors = listOf(color1, color2, color3, color1)
+                            ),
+                            shape = CircleShape
+                        )
+                        .clip(CircleShape)
+                        .clickable {
+                            // Reset all states
+                            tts.stop()
+                            isListening = false
+                            isSpeaking = false
+                            isProcessing = false
 
-                        // Prepare for speech input
-                        tts.speak("Mikrofon aktif. Silakan berbicara.", TextToSpeech.QUEUE_FLUSH, null, null)
+                            // Prepare for speech input
+                            tts.speak("Mikrofon aktif. Silakan berbicara.", TextToSpeech.QUEUE_FLUSH, null, null)
 
-                        MainScope().launch {
-                            delay(2000)
-                            isListening = true
-                            speechLauncher.launch(speechRecognizerIntent)
+                            MainScope().launch {
+                                delay(2000)
+                                isListening = true
+                                speechLauncher.launch(speechRecognizerIntent)
+                            }
                         }
-                    }
-            )
+                )
+            }
         }
     }
 }
