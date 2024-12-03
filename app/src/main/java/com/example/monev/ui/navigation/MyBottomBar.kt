@@ -1,5 +1,7 @@
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -43,6 +45,35 @@ fun MyBottomBar(
             label = {
                 Text(
                     text = "Home",
+                    fontSize = 12.sp
+                )
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = Color.Black,
+                selectedTextColor = Color.Black,
+                unselectedIconColor = Color.Black,
+                unselectedTextColor = Color.Black
+            )
+        )
+
+        // Bot Item
+        NavigationBarItem(
+            selected = selectedRoute.value == Destinations.ChatbotScreen.route,
+            onClick = {
+                selectedRoute.value = Destinations.ChatbotScreen.route
+                navController.navigate(Destinations.ChatbotScreen.route) {
+                    popUpTo(Destinations.ChatbotScreen.route) { inclusive = true }
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = "Settings"
+                )
+            },
+            label = {
+                Text(
+                    text = "Bot",
                     fontSize = 12.sp
                 )
             },

@@ -7,80 +7,39 @@ import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
-import androidx.compose.material.icons.filled.Mic
-import com.google.ai.client.generativeai.type.ResponseStoppedException
+import com.google.ai.client.generativeai.type.GenerateContentResponse
+import androidx.compose.animation.core.*
+import androidx.compose.ui.draw.alpha
+import com.google.ai.client.generativeai.BuildConfig
 
 @Composable
 fun ChatbotScreen() {
-    var userInput by remember { mutableStateOf("") }
-    var messages by remember { mutableStateOf(listOf<Message>()) }
-    val listState = rememberLazyListState()
     val context = LocalContext.current
 
+    // Initialize Text-to-Speech setup
     val tts = remember { TextToSpeech(context) { } }
-    val generativeModel = GenerativeModel(
-        modelName = "gemini-pro",
-        apiKey = "keymu kang"
-    )
 
-    val predefinedPrompts = mapOf(
-        "Hello" to "Hi there! How can I help you today?",
-        "How are you?" to "I'm an AI, so I don't have feelings, but thanks for asking!",
-        "What is your name?" to "I am Gemini AI, your virtual assistant."
-    )
-    fun generateResponse(prompt: String): String {
-        return predefinedPrompts[prompt] ?: "I'm sorry, I don't understand that prompt."
-    }
-    fun sendMessage() {
-        if (userInput.isNotEmpty()) {
-            val prompt = userInput
-            messages = messages + Message(prompt, MessageType.USER)
-            userInput = ""
-
-            MainScope().launch {
-                try {
-                    if (tts.isSpeaking) {
-                        tts.stop()
-                    }
-                    val aiResponse = generateResponse(prompt)
-                    messages = messages + Message(aiResponse, MessageType.AI)
-                    tts.speak(aiResponse, TextToSpeech.QUEUE_FLUSH, null, null)
-                } catch (e: ResponseStoppedException) {
-                    val warningMessage = "Content generation stopped due to safety reasons."
-                    messages = messages + Message(warningMessage, MessageType.AI)
-                    tts.speak(warningMessage, TextToSpeech.QUEUE_FLUSH, null, null)
-                }
-            }
-        }
-    }
-
+    // Initialize SpeechRecognizer
     val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
     val speechRecognizerIntent = remember {
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -88,16 +47,60 @@ fun ChatbotScreen() {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
         }
     }
+
+    // Variable for animation while bot is speaking
+    var isSpeaking by remember { mutableStateOf(false) }
+
+    // Animations for "wave" effect
+    val size by animateDpAsState(
+        targetValue = if (isSpeaking) 170.dp else 150.dp, // Increase size during speech
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+    val opacity by animateFloatAsState(
+        targetValue = if (isSpeaking) 0.6f else 1f, // Opacity decreases when speaking
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
+    // Launcher for Speech Input
     val speechLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             if (!matches.isNullOrEmpty()) {
-                userInput = matches[0]
-                sendMessage()
+                // If there's a match, speak the result using TextToSpeech
+                val userInput = matches[0]
+                val prompt = "Kau adalah seorang developer aplikasi monev. Aplikasi yang bertujuan untuk tunanetra dalam melakukan scan nilai mata uang melalui kamera. Client bertanya: \"$userInput\""
+
+                // Menggunakan API Gemini untuk menghasilkan response dengan prompt yang disesuaikan
+                MainScope().launch {
+                    try {
+                        // Menggunakan API Gemini untuk menghasilkan response
+                        val aiResponse: GenerateContentResponse = generativeModel.generateContent(prompt)
+                        val aiText = aiResponse.text?.replace("*", "") ?: "Maaf, saya tidak dapat menghasilkan respons."
+
+                        // Menyuarakan response menggunakan TTS
+                        isSpeaking = true // Start animation when bot is speaking
+                        tts.speak(aiText, TextToSpeech.QUEUE_FLUSH, null, null)
+
+                        // After TTS finishes speaking, stop the animation
+                        delay(aiText.length * 100L) // Wait for approximate duration of the speech
+                        isSpeaking = false
+
+                    } catch (e: Exception) {
+                        val errorMessage = "Terjadi kesalahan: ${e.message}"
+                        tts.speak(errorMessage, TextToSpeech.QUEUE_FLUSH, null, null)
+                    }
+                }
             }
         }
     }
 
+    // Layout
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -110,169 +113,57 @@ fun ChatbotScreen() {
                 )
             )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Gemini AI",
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(
-                    onClick = { messages = emptyList() },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color.Gray.copy(alpha = 0.2f), shape = CircleShape)
-                ) {
-                    Icon(
-                        Icons.Outlined.Clear,
-                        contentDescription = "Clear Chat",
-                        tint = Color.White
-                    )
-                }
-            }
-
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                state = listState,
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
-                items(messages.size) { index ->
-                    val message = messages[index]
-                    MessageBubble(message)
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextField(
-                    value = userInput,
-                    onValueChange = { userInput = it },
-                    placeholder = {
-                        Text(
-                            "Type a message...",
-                            color = Color.Gray
-                        )
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp)
-                        .background(
-                            color = Color.Gray.copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(24.dp)
-                        ),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    ),
-                    singleLine = true
-                )
-
-                Box(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFF4285F4),
-                                    Color(0xFF34A853)
-                                )
-                            ),
-                            shape = CircleShape
-                        )
-                        .clickable { sendMessage() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Send,
-                        contentDescription = "Send",
-                        tint = Color.White
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFF4285F4),
-                                    Color(0xFF34A853)
-                                )
-                            ),
-                            shape = CircleShape
-                        )
-                        .clickable { speechLauncher.launch(speechRecognizerIntent) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Mic,
-                        contentDescription = "Voice Input",
-                        tint = Color.White
-                    )
-                }
-            }
-        }
-    }
-}
-
-// Enum for message type
-enum class MessageType {
-    USER, AI
-}
-
-// Data class for message
-data class Message(
-    val text: String,
-    val type: MessageType
-)
-
-@Composable
-fun MessageBubble(message: Message) {
-    // Chat bubble with different design for user and AI
-    val isUserMessage = message.type == MessageType.USER
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = if (isUserMessage) Arrangement.End else Arrangement.Start
-    ) {
+        // Centering the button in the middle of the screen
         Box(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    color = if (isUserMessage)
-                        Color(0xFF4285F4).copy(alpha = 0.7f)
-                    else
-                        Color.Gray.copy(alpha = 0.3f)
-                )
-                .padding(12.dp)
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = message.text,
-                color = Color.White,
-                modifier = Modifier.alpha(0.9f)
-            )
+            // The large button to trigger speech input
+            Box(
+                modifier = Modifier
+                    .size(size) // Use the animated size here
+                    .alpha(opacity) // Use animated opacity here
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF4285F4),
+                                Color(0xFF34A853)
+                            )
+                        ),
+                        shape = CircleShape
+                    )
+                    .clickable {
+                        // Stop current speaking before handling new user input
+                        tts.stop()
+
+                        // Play notification sound indicating that the microphone is active
+                        tts.speak("Mikrofon aktif. Silakan berbicara.", TextToSpeech.QUEUE_FLUSH, null, null)
+
+                        // Add a small delay before starting the microphone recording
+                        MainScope().launch {
+                            delay(3000) // Wait for 2 seconds to allow the TTS message to finish
+
+                            // Launch speech input after delay
+                            speechLauncher.launch(speechRecognizerIntent)
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = "Voice Input",
+                    tint = Color.White,
+                    modifier = Modifier.size(80.dp) // Adjust icon size for better visibility
+                )
+            }
         }
     }
 }
+
+// Initialize Gemini API client
+val generativeModel = GenerativeModel(
+    modelName = "gemini-pro",
+    apiKey = ""
+)

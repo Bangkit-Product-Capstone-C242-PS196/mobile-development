@@ -35,11 +35,6 @@ fun HomeScreen(
     ) {
         Text(text = "Home Screen")
         Button(onClick = {
-            navController.navigate(Destinations.SettingScreen.route)
-        }) {
-            Text(text = "Go to Setting Screen")
-        }
-        Button(onClick = {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             launcher.launch(intent)
         }) {
