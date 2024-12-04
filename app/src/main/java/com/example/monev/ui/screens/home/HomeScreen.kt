@@ -1,41 +1,54 @@
 package com.example.monev.ui.screens.home
 
-import androidx.compose.material3.Button
-
+import android.content.Intent
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import com.example.monev.ui.navigation.Destinations
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
     navController: NavController
-
 ) {
-    Column (
+    LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        // Handle the result if needed
+    }
+    val colorScheme = MaterialTheme.colorScheme
+
+    Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
+            .background(colorScheme.background)
     ) {
-        Text(
-            text = "Home Screen"
+        Text(text = "Home Screen",
+            color= colorScheme.onBackground
         )
-        Button(
-            onClick = {
-                navController.navigate(Destinations.SettingScreen.route)
-            }
-        ) {
-            Text(
-                text = "ggo setting screen"
+        Button(onClick = {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            launcher.launch(intent)
+        },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorScheme.primary
             )
+            ) {
+            Text(text = "Open Camera")
         }
     }
-
 }

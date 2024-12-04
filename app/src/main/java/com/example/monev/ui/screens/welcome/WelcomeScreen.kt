@@ -26,10 +26,12 @@ import com.example.monev.R
 fun WelcomeScreen(
     onNextClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Box(
+
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF33B5E5))
+            .background(colorScheme.primary)
     ) {
         Column(
             modifier = Modifier
@@ -48,7 +50,7 @@ fun WelcomeScreen(
                     style = TextStyle(
                         fontSize = 40.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         textAlign = TextAlign.Center
                     ),
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -64,7 +66,7 @@ fun WelcomeScreen(
                     },
                     style = TextStyle(
                         fontSize = 16.sp,
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         textAlign = TextAlign.Center,
                         lineHeight = 24.sp
                     ),
