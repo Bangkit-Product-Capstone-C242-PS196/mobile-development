@@ -6,4 +6,6 @@ sealed class Destinations (val route: String) {
     data object AccountScreen: Destinations("AccountScreen")
     data object SettingScreen: Destinations("SettingScreen")
     data object ChatbotScreen: Destinations("ChatbotScreen")
+    data object DetailMonthScreen: Destinations("DetailMonthScreen")
+
 }

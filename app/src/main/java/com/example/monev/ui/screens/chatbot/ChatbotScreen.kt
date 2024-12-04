@@ -207,7 +207,7 @@ fun ChatbotScreen(navController: NavController) {
                             tts.speak("Mikrofon aktif. Silakan berbicara.", TextToSpeech.QUEUE_FLUSH, null, null)
 
                             MainScope().launch {
-                                delay(2000)
+                                delay(3000)
                                 isListening = true
                                 speechLauncher.launch(speechRecognizerIntent)
                             }

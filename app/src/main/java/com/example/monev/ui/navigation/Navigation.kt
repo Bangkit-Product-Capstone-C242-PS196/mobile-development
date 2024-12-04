@@ -13,13 +13,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.monev.ui.screens.account.AccountScreen
+import com.example.monev.ui.screens.chatbot.ChatbotScreen
+import com.example.monev.ui.screens.detail.detailmonth.DetailMonthScreen
 import com.example.monev.ui.screens.home.HomeScreen
 import com.example.monev.ui.screens.setting.SettingScreen
 import com.example.monev.ui.screens.welcome.WelcomeScreen
-import com.example.monev.ui.screens.chatbot.ChatbotScreen
-
-
-
 
 
 @Composable
@@ -79,9 +77,19 @@ fun Navigation(modifier: Modifier = Modifier) {
             composable(Destinations.AccountScreen.route) {
                 AccountScreen(navController = navController)
             }
+
+            // chatbot
             composable(Destinations.ChatbotScreen.route) {
                 ChatbotScreen(navController = navController)
             }
+
+            // DetailMonth Screen dengan parameter bulan dan jumlah
+            composable("detailMonth/{month}/{amount}") { backStackEntry ->
+                val month = backStackEntry.arguments?.getString("month") ?: "Default Month"
+                val amount = backStackEntry.arguments?.getString("amount") ?: "Default Amount"
+                DetailMonthScreen(month = month, amount = amount)
+            }
+
         }
     }
 }
