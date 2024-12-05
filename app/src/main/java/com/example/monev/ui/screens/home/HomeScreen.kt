@@ -17,10 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import com.example.monev.sign_in.UserData
 
 @Composable
 fun HomeScreen(
-    navController: NavController
+    navController: NavController,
+    userData: UserData?,
+    onSignOut: ()-> Unit
 ) {
     LocalContext.current
     val launcher = rememberLauncherForActivityResult(
@@ -49,6 +52,11 @@ fun HomeScreen(
             )
             ) {
             Text(text = "Open Camera")
+        }
+        Button(onClick = onSignOut) {
+            Text(
+                text = "Signout"
+            )
         }
     }
 }

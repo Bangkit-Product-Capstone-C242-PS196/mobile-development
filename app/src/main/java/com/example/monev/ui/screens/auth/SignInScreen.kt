@@ -1,34 +1,60 @@
-package com.example.monev.ui.screens.welcome
+package com.example.monev.ui.screens.auth
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import com.example.monev.R
+import com.example.monev.sign_in.SignInState
 
 @Composable
-fun WelcomeScreen(
-    onNextClick: () -> Unit
+fun SignInScreen(
+    state: SignInState,
+    onSignInClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val navController = rememberNavController()
+
+    // Menggunakan key1 yang berupa state.signInError
+    LaunchedEffect(key1 = state.signInError) {
+        state.signInError?.let { error ->
+            Toast.makeText(
+                context,
+                error,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     val colorScheme = MaterialTheme.colorScheme
     Box(
-
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.primary)
@@ -46,7 +72,7 @@ fun WelcomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Selamat\nDatang",
+                    text = "Silahkan\nLogin",
                     style = TextStyle(
                         fontSize = 40.sp,
                         fontWeight = FontWeight.Bold,
@@ -58,11 +84,8 @@ fun WelcomeScreen(
 
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Monev")
-                        }
-                        append(", aplikasi untuk tunanetra yang")
-                        append(" mendeteksi nilai mata uang dengan fitur scan dan text-to-speech.")
+                        append("Silahkan login terlebih dahulu")
+                        append(" dengan klik tombol yang ada di pojok bawah")
                     },
                     style = TextStyle(
                         fontSize = 16.sp,
@@ -75,15 +98,15 @@ fun WelcomeScreen(
             }
 
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                painter = painterResource(id = R.drawable.login_image),
                 contentDescription = "Welcome Character",
                 modifier = Modifier
-                    .size(200.dp)
-                    .padding(vertical = 32.dp)
+                    .size(300.dp)
+
             )
 
             Button(
-                onClick = onNextClick,
+                onClick = onSignInClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
@@ -95,9 +118,8 @@ fun WelcomeScreen(
                 shape = RoundedCornerShape(28.dp)
             ) {
                 Text(
-                    text = "Selanjutnya",
+                    text = "Login with Google",
                     fontWeight = FontWeight.Bold,
-
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
@@ -108,4 +130,3 @@ fun WelcomeScreen(
         }
     }
 }
-

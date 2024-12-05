@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1028040060582",
+    "project_id": "capstone-monev",
+    "storage_bucket": "capstone-monev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1028040060582:android:49605a801af7eac2f74e67",
+        "android_client_info": {
+          "package_name": "com.example.monev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARcuVJppZyDBr4GS4zcCEZb4CLDmTh8yI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
