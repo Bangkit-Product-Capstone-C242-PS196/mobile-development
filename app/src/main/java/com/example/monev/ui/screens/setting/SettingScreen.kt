@@ -23,6 +23,7 @@ import com.example.monev.ui.navigation.Destinations
 fun SettingScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
+    onSignOut: ()-> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -103,6 +104,15 @@ fun SettingScreen(
                 onClick = {
                     // Additional navigation or logic for Help
                 },
+                colorScheme = colorScheme
+            )
+
+            // logout
+            SettingListItem(
+                icon = Icons.Default.ExitToApp,
+                title = "Logout",
+                description = "Logout from app",
+                onClick = onSignOut,
                 colorScheme = colorScheme
             )
         }

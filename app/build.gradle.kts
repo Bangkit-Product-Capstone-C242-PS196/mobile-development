@@ -3,6 +3,8 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.services)
+
 }
 
 android {
@@ -83,4 +85,9 @@ dependencies {
     implementation(libs.generativeai)
     implementation(libs.okhttp)
 //    implementation(libs.androidx.material.icons.extended)
+
+    // firebase
+    implementation("com.google.firebase:firebase-auth-ktx:23.1.0")
+    implementation("com.google.android.gms:play-services-auth:20.4.1")
+    implementation("io.coil-kt:coil-compose:2.2.2")
 }
