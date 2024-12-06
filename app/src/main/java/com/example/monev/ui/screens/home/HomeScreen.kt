@@ -1,6 +1,9 @@
 package com.example.monev.ui.screens.home
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,50 +16,144 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import com.example.monev.helper.PredictionHelper
 import com.example.monev.sign_in.UserData
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    userData: UserData?,
-    onSignOut: ()-> Unit
+    userData: UserData? = null,
+    onSignOut: () -> Unit
 ) {
-    LocalContext.current
+    val context = LocalContext.current
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    var predictionResult by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    var predictionHelper by remember { mutableStateOf<PredictionHelper?>(null) }
+
+    // Fungsi untuk memproses gambar yang diambil dan membuat prediksi
+    fun processImage(bitmap: Bitmap) {
+        // Cek apakah PredictionHelper sudah diinisialisasi dengan benar
+        if (predictionHelper != null) {
+            val imageByteBuffer = convertBitmapToByteBuffer(bitmap)
+            predictionHelper?.predict(imageByteBuffer)
+        } else {
+            error("Model is not initialized yet.")
+        }
+    }
+
+    // Request permission untuk akses kamera
     val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        hasCameraPermission = isGranted
+    }
+
+    // Pemanggilan fungsi ketika gambar dari kamera berhasil diambil
+    val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        // Handle the result if needed
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val data = result.data
+            val imageBitmap: Bitmap = data?.extras?.get("data") as Bitmap
+            processImage(imageBitmap)  // Proses gambar
+        }
     }
-    val colorScheme = MaterialTheme.colorScheme
 
+    // Setup PredictionHelper ketika komponen dimulai
+    LaunchedEffect(Unit) {
+        predictionHelper = PredictionHelper(
+            context = context,
+            onResult = { result ->
+                predictionResult = result
+                errorMessage = null
+            },
+            onError = { error ->
+                predictionResult = null
+                errorMessage = error
+            }
+        )
+    }
+
+    // UI
     Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .background(colorScheme.background)
+            .background(MaterialTheme.colorScheme.background),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Home Screen",
-            color= colorScheme.onBackground
-        )
-        Button(onClick = {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            launcher.launch(intent)
-        },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorScheme.primary
-            )
-            ) {
+        Text(text = "Home Screen", color = MaterialTheme.colorScheme.onBackground)
+
+        // Tombol untuk membuka kamera
+        Button(
+            onClick = {
+                if (hasCameraPermission) {
+                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    cameraLauncher.launch(intent)
+                } else {
+                    launcher.launch(Manifest.permission.CAMERA)
+                }
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
             Text(text = "Open Camera")
         }
+
+        // Tombol untuk sign-out
         Button(onClick = onSignOut) {
+            Text(text = "Signout")
+        }
+
+        // Tampilkan hasil prediksi jika ada
+        predictionResult?.let {
             Text(
-                text = "Signout"
+                text = "Prediction: $it",
+                fontSize = 30.sp
+
             )
         }
+
+        // Tampilkan pesan error jika ada
+        errorMessage?.let {
+            Text(text = "Error: $it", color = MaterialTheme.colorScheme.error)
+        }
     }
+}
+
+fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
+    val inputSize = 224  // Ukuran gambar input
+    val byteBuffer = ByteBuffer.allocateDirect(4 * inputSize * inputSize * 3)
+    byteBuffer.order(ByteOrder.nativeOrder())
+
+    val scaledBitmap = Bitmap.createScaledBitmap(bitmap, inputSize, inputSize, false)
+    for (i in 0 until inputSize) {
+        for (j in 0 until inputSize) {
+            val pixel = scaledBitmap.getPixel(i, j)
+            byteBuffer.putFloat(((pixel shr 16) and 0xFF) / 255.0f)  // R
+            byteBuffer.putFloat(((pixel shr 8) and 0xFF) / 255.0f)   // G
+            byteBuffer.putFloat((pixel and 0xFF) / 255.0f)           // B
+        }
+    }
+
+    return byteBuffer
 }
