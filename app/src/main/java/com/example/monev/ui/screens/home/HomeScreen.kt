@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.provider.MediaStore
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -51,6 +52,15 @@ fun HomeScreen(
 
     var predictionHelper by remember { mutableStateOf<PredictionHelper?>(null) }
 
+    // Setup TextToSpeech
+    val textToSpeech = remember { TextToSpeech(context) { status ->
+        if (status == TextToSpeech.SUCCESS) {
+            Log.d("HomeScreen", "TTS Initialized Successfully")
+        } else {
+            Log.e("HomeScreen", "Failed to initialize TTS")
+        }
+    } }
+
     // Fungsi untuk memproses gambar yang diambil dan membuat prediksi
     fun processImage(bitmap: Bitmap) {
         // Cek apakah PredictionHelper sudah diinisialisasi dengan benar
@@ -74,21 +84,18 @@ fun HomeScreen(
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        Log.d("HomeScreen", "Activity Result Code: ${result.resultCode}")  // Log result code
 
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             val data = result.data
-            Log.d("HomeScreen", "Data: $data")  // Log data yang diterima
 
             val imageBitmap: Bitmap? = data?.extras?.get("data") as? Bitmap
             if (imageBitmap != null) {
-                Log.d("HomeScreen", "Image Bitmap: ${imageBitmap.width}x${imageBitmap.height}")  // Log ukuran gambar
                 processImage(imageBitmap)  // Proses gambar
             } else {
-                Log.e("HomeScreen", "Failed to capture image: Bitmap is null")  // Log error jika gambar null
+                Log.e("HomeScreen", "Failed to capture image: Bitmap is null")
             }
         } else {
-            Log.e("HomeScreen", "Image capture failed: Result code is not OK")  // Log jika resultCode bukan OK
+            Log.e("HomeScreen", "Image capture failed: Result code is not OK")
         }
     }
 
@@ -100,6 +107,11 @@ fun HomeScreen(
                 predictionResult = result
                 errorMessage = null
                 Log.d("HomeScreen", "Prediction result: $result")  // Log hasil prediksi
+
+                // Menambahkan TTS setelah hasil prediksi
+                predictionResult?.let { result ->
+                    textToSpeech.speak(result, TextToSpeech.QUEUE_FLUSH, null, null)
+                }
             },
             onError = { error ->
                 predictionResult = null
@@ -124,10 +136,8 @@ fun HomeScreen(
             onClick = {
                 if (hasCameraPermission) {
                     val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    Log.d("HomeScreen", "Launching camera")  // Log saat kamera diluncurkan
                     cameraLauncher.launch(intent)
                 } else {
-                    Log.d("HomeScreen", "Requesting camera permission")  // Log saat meminta izin kamera
                     launcher.launch(Manifest.permission.CAMERA)
                 }
             },
