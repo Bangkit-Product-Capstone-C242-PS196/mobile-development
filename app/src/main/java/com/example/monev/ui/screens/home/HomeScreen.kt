@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -66,16 +67,28 @@ fun HomeScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         hasCameraPermission = isGranted
+        Log.d("HomeScreen", "Camera Permission: $isGranted")  // Log izin kamera
     }
 
     // Pemanggilan fungsi ketika gambar dari kamera berhasil diambil
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
+        Log.d("HomeScreen", "Activity Result Code: ${result.resultCode}")  // Log result code
+
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             val data = result.data
-            val imageBitmap: Bitmap = data?.extras?.get("data") as Bitmap
-            processImage(imageBitmap)  // Proses gambar
+            Log.d("HomeScreen", "Data: $data")  // Log data yang diterima
+
+            val imageBitmap: Bitmap? = data?.extras?.get("data") as? Bitmap
+            if (imageBitmap != null) {
+                Log.d("HomeScreen", "Image Bitmap: ${imageBitmap.width}x${imageBitmap.height}")  // Log ukuran gambar
+                processImage(imageBitmap)  // Proses gambar
+            } else {
+                Log.e("HomeScreen", "Failed to capture image: Bitmap is null")  // Log error jika gambar null
+            }
+        } else {
+            Log.e("HomeScreen", "Image capture failed: Result code is not OK")  // Log jika resultCode bukan OK
         }
     }
 
@@ -86,10 +99,12 @@ fun HomeScreen(
             onResult = { result ->
                 predictionResult = result
                 errorMessage = null
+                Log.d("HomeScreen", "Prediction result: $result")  // Log hasil prediksi
             },
             onError = { error ->
                 predictionResult = null
                 errorMessage = error
+                Log.e("HomeScreen", "Prediction error: $error")  // Log error prediksi
             }
         )
     }
@@ -109,8 +124,10 @@ fun HomeScreen(
             onClick = {
                 if (hasCameraPermission) {
                     val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    Log.d("HomeScreen", "Launching camera")  // Log saat kamera diluncurkan
                     cameraLauncher.launch(intent)
                 } else {
+                    Log.d("HomeScreen", "Requesting camera permission")  // Log saat meminta izin kamera
                     launcher.launch(Manifest.permission.CAMERA)
                 }
             },
@@ -129,7 +146,6 @@ fun HomeScreen(
             Text(
                 text = "Prediction: $it",
                 fontSize = 30.sp
-
             )
         }
 
