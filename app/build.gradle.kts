@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.ksp)
 
 }
 
@@ -86,6 +87,9 @@ dependencies {
     implementation(libs.okhttp)
 //    implementation(libs.androidx.material.icons.extended)
 
+    // firestore
+    implementation(libs.firebase.firestore)
+
     // firebase
     implementation("com.google.firebase:firebase-auth-ktx:23.1.0")
     implementation("com.google.android.gms:play-services-auth:20.4.1")
@@ -99,5 +103,10 @@ dependencies {
 
     // foundation
     implementation("androidx.compose.foundation:foundation:1.0.0")
+
+    // Room components
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
 
 }

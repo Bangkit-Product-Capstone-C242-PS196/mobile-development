@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -130,6 +132,25 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Home Screen", color = MaterialTheme.colorScheme.onBackground)
+
+        Button(
+            onClick = {
+                // Navigasi ke CreateHistoryScreen
+                navController.navigate("create_history_screen")
+            },
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Text(text = "Go to Create History")
+        }
+
+        Button(
+            onClick = {
+                // Navigasi ke ListHistoryScreen
+                navController.navigate("list_history_screen")
+            }
+        ) {
+            Text(text = "Go to List History")
+        }
 
         // Tombol untuk membuka kamera
         Button(
