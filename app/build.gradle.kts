@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.ksp)
 
 }
 
@@ -86,8 +87,26 @@ dependencies {
     implementation(libs.okhttp)
 //    implementation(libs.androidx.material.icons.extended)
 
+    // firestore
+    implementation(libs.firebase.firestore)
+
     // firebase
     implementation("com.google.firebase:firebase-auth-ktx:23.1.0")
     implementation("com.google.android.gms:play-services-auth:20.4.1")
     implementation("io.coil-kt:coil-compose:2.2.2")
+
+    // model
+    implementation("com.google.android.gms:play-services-tflite-java:16.1.0")
+    implementation("com.google.android.gms:play-services-tflite-gpu:16.2.0")
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+    implementation("com.google.firebase:firebase-ml-modeldownloader:24.2.1")
+
+    // foundation
+    implementation("androidx.compose.foundation:foundation:1.0.0")
+
+    // Room components
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+
 }

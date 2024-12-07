@@ -25,6 +25,8 @@ import com.example.monev.ui.screens.auth.SignInScreen
 import com.example.monev.viewmodel.auth.SignInViewModel
 import com.example.monev.ui.screens.account.AccountScreen
 import com.example.monev.ui.screens.chatbot.ChatbotScreen
+import com.example.monev.ui.screens.history.CreateHistoryScreen
+import com.example.monev.ui.screens.history.ListHistoryScreen
 import com.example.monev.ui.screens.home.HomeScreen
 import com.example.monev.ui.screens.setting.SettingScreen
 import com.example.monev.ui.screens.welcome.WelcomeScreen
@@ -136,6 +138,14 @@ fun Navigation(modifier: Modifier = Modifier) {
                         }
                     }
                 )
+            }
+
+            // history screen
+            composable("create_history_screen") {
+                CreateHistoryScreen(navController = navController)
+            }
+            composable("list_history_screen") {
+                ListHistoryScreen(navController = navController)
             }
 
             // HomeScreen (dengan BottomBar)
