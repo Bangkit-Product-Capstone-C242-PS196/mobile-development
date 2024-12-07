@@ -2,7 +2,7 @@ package com.example.monev.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val primaryLight = Color(0xFF006688)
+val primaryLight = Color(0xFF48BBED)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFF48BBED)
 val onPrimaryContainerLight = Color(0xFF002837)
@@ -38,7 +38,7 @@ val surfaceContainerLight = Color(0xFFEAEEF2)
 val surfaceContainerHighLight = Color(0xFFE4E9ED)
 val surfaceContainerHighestLight = Color(0xFFDFE3E7)
 
-val primaryLightMediumContrast = Color(0xFF004862)
+val primaryLightMediumContrast = Color(0xFF48BBED)
 val onPrimaryLightMediumContrast = Color(0xFFFFFFFF)
 val primaryContainerLightMediumContrast = Color(0xFF007EA7)
 val onPrimaryContainerLightMediumContrast = Color(0xFFFFFFFF)
