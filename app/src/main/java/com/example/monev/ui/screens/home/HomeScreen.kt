@@ -35,6 +35,7 @@ import androidx.navigation.NavController
 import com.example.monev.helper.PredictionHelper
 import com.example.monev.sign_in.UserData
 import java.nio.ByteBuffer
+import androidx.compose.ui.unit.sp
 import java.nio.ByteOrder
 
 @Composable
@@ -140,6 +141,24 @@ fun HomeScreen(
         Text(text = "Home Screen", color = MaterialTheme.colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                // Navigasi ke CreateHistoryScreen
+                navController.navigate("create_history_screen")
+            },
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Text(text = "Go to Create History")
+        }
+
+        Button(
+            onClick = {
+                // Navigasi ke ListHistoryScreen
+                navController.navigate("list_history_screen")
+            }
+        ) {
+            Text(text = "Go to List History")
+        }
 
         // Tombol untuk membuka kamera
         Button(
