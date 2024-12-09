@@ -143,18 +143,9 @@ fun ProfileHeader(userData: UserData?) {
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium
             )
-            Text(
-                text = "Senior Designer",
-                color = Color.Gray
-            )
+
         }
-        IconButton(onClick = { /* Edit profile */ }) {
-            Icon(
-                Icons.Default.Edit,
-                contentDescription = "Edit Profile",
-                tint = Color.Gray
-            )
-        }
+
     }
 }
 
@@ -204,11 +195,12 @@ fun SettingSection(
     }
 
     Text(
-        text = "Settings",
+        text = "Pengaturan",
         color = Color.Gray,
         modifier = Modifier.padding(vertical = 8.dp)
     )
 
+    // notif
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -225,14 +217,14 @@ fun SettingSection(
             ) {
                 Icon(
                     Icons.Default.Notifications,
-                    contentDescription = "Notifications",
+                    contentDescription = "Notifikasi",
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "Enable Notifications",
+                text = "Nyalakan Notifikasi",
                 fontSize = 16.sp,
                 modifier = Modifier.weight(1f)
             )
