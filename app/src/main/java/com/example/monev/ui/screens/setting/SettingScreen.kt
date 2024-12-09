@@ -34,37 +34,16 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import coil.compose.AsyncImage
 import com.example.monev.sign_in.UserData
 import com.example.monev.ui.navigation.Destinations
-
-fun showDummyNotification(context: Context) {
-    val channelId = "dummy_channel_id"
-    val channelName = "Dummy Notifications"
-    val notificationId = 1
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT).apply {
-            description = "Channel for dummy notifications"
-        }
-        val notificationManager: NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-    }
-
-    val builder = NotificationCompat.Builder(context, channelId)
-        .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle("Dummy Notification")
-        .setContentText("This is a dummy notification.")
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-        with(NotificationManagerCompat.from(context)) {
-            notify(notificationId, builder.build())
-        }
-    } else {
-        ActivityCompat.requestPermissions(context as ComponentActivity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
-    }
-}
+import com.example.monev.utils.PreferenceManager
+import com.example.monev.worker.DailyReminderWorker
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +60,7 @@ fun SettingScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            showDummyNotification(context)
+            showNotification(context)
         }
     }
 
@@ -125,11 +104,12 @@ fun SettingScreen(
 //            StatusSection()
 
 
-            // Dashboard Section
-            DashboardSection(context, requestPermissionLauncher)
+            // Setting Section
+            SettingSection(context, requestPermissionLauncher)
 
             // Account Section
             AccountSection(onSignOut)
+
 
         }
     }
@@ -209,143 +189,71 @@ fun ProfileHeader(userData: UserData?) {
 //    }
 //}
 
-@Composable
-fun NotificationConfirmationDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = "Enable Notification") },
-        text = { Text(text = "Do you want to enable notifications?") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Yes")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("No")
-            }
-        }
-    )
-}
 
 @Composable
-fun DashboardSection(
+fun SettingSection(
     context: Context,
     requestPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>
 ) {
-    var showDialog by remember { mutableStateOf(false) }
+    val preferenceManager = remember { PreferenceManager(context) }
+    var isNotificationEnabled by remember { mutableStateOf(preferenceManager.getNotificationStatus()) }
 
-    if (showDialog) {
-        NotificationConfirmationDialog(
-            onConfirm = {
-                showDialog = false
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                    showDummyNotification(context)
-                } else {
-                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            },
-            onDismiss = { showDialog = false }
-        )
+    fun startDailyReminderWorker() {
+        val dailyReminderRequest: WorkRequest = PeriodicWorkRequestBuilder<DailyReminderWorker>(1, TimeUnit.DAYS).build()
+        WorkManager.getInstance(context).enqueue(dailyReminderRequest)
     }
 
     Text(
-        text = "Dashboard",
+        text = "Settings",
         color = Color.Gray,
         modifier = Modifier.padding(vertical = 8.dp)
     )
-    DashboardItem(
-        icon = Icons.Default.ShoppingCart,
-        iconBackgroundColor = Color.Green,
-        text = "Payments",
-        badge = "2 New"
-    )
-    DashboardItem(
-        icon = Icons.Default.CheckCircle,
-        iconBackgroundColor = Color.Yellow,
-        text = "Achievements"
-    )
-    DashboardItem(
-        icon = Icons.Default.Lock,
-        iconBackgroundColor = Color.Gray,
-        text = "Privacy",
-        badge = "Actions Needed",
-        badgeColor = Color.Red
-    )
-    DashboardItem(
-        icon = Icons.Default.Notifications,
-        iconBackgroundColor = Color.Blue,
-        text = "Notifications",
-        badge = "5 New",
-        badgeColor = Color.Magenta,
-        onClick = { showDialog = true }
-    )
-}
 
-@Composable
-fun DashboardItem(
-    icon: ImageVector,
-    iconBackgroundColor: Color,
-    text: String,
-    badge: String? = null,
-    badgeColor: Color = Color.Blue,
-    onClick: (() -> Unit)? = null
-) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable(onClick = onClick ?: {}),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(end = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(iconBackgroundColor, shape = CircleShape),
+                    .background(Color.Blue, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    icon,
-                    contentDescription = text,
+                    Icons.Default.Notifications,
+                    contentDescription = "Notifications",
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = text,
-                fontWeight = FontWeight.Medium
+                text = "Enable Notifications",
+                fontSize = 16.sp,
+                modifier = Modifier.weight(1f)
             )
         }
-
-        badge?.let {
-            Surface(
-                color = badgeColor,
-                shape = MaterialTheme.shapes.large
-            ) {
-                Text(
-                    text = it,
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
+        Switch(
+            checked = isNotificationEnabled,
+            onCheckedChange = { isChecked ->
+                isNotificationEnabled = isChecked
+                preferenceManager.setNotificationStatus(isChecked)
+                if (isChecked) {
+                    showNotification(context)
+                    startDailyReminderWorker()
+                }
             }
-        }
+        )
     }
 }
 
+
 @Composable
 fun AccountSection(onSignOut: () -> Unit) {
-    Text(
-        text = "My Account",
-        color = Color.Gray,
-        modifier = Modifier.padding(vertical = 8.dp)
-    )
     TextButton(
         onClick = onSignOut,
         modifier = Modifier.fillMaxWidth()
@@ -390,3 +298,37 @@ fun StatusChip(
     }
 }
 
+
+fun showNotification(context: Context) {
+    val preferenceManager = PreferenceManager(context)
+    val isNotificationEnabled = preferenceManager.getNotificationStatus()
+
+    // Jika notifikasi dimatikan, hentikan fungsi
+    if (!isNotificationEnabled) return
+
+    val channelId = "dummy_channel_id"
+    val channelName = "Dummy Notifications"
+    val notificationId = 1
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT).apply {
+            description = "Channel for dummy notifications"
+        }
+        val notificationManager: NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    val builder = NotificationCompat.Builder(context, channelId)
+        .setSmallIcon(android.R.drawable.ic_dialog_info)
+        .setContentTitle("Notification Enabled")
+        .setContentText("This is a test notification.")
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+        with(NotificationManagerCompat.from(context)) {
+            notify(notificationId, builder.build())
+        }
+    } else {
+        ActivityCompat.requestPermissions(context as ComponentActivity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+    }
+}

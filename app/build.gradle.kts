@@ -109,4 +109,7 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
 
+    //work manager
+    implementation ("androidx.work:work-runtime-ktx:2.10.0")
+
 }
