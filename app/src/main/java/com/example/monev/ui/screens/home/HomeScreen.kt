@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -31,11 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.monev.helper.PredictionHelper
 import com.example.monev.sign_in.UserData
+import com.example.monev.viewmodel.history.HistoryViewModel
 import java.nio.ByteBuffer
-import androidx.compose.ui.unit.sp
 import java.nio.ByteOrder
 
 @Composable
@@ -43,7 +45,7 @@ fun HomeScreen(
     navController: NavController,
     userData: UserData? = null,
     onSignOut: () -> Unit,
-    onPredictionResult: (String, Float) -> Unit
+    onPredictionResult: (String, Float) -> Unit  // Tambahkan parameter ini
 ) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
@@ -67,7 +69,6 @@ fun HomeScreen(
 
     // Fungsi untuk memproses gambar yang diambil dan membuat prediksi
     fun processImage(bitmap: Bitmap) {
-        // Cek apakah PredictionHelper sudah diinisialisasi dengan benar
         if (predictionHelper != null) {
             val imageByteBuffer = convertBitmapToByteBuffer(bitmap)
             predictionHelper?.predict(imageByteBuffer)
@@ -82,6 +83,9 @@ fun HomeScreen(
     ) { isGranted: Boolean ->
         hasCameraPermission = isGranted
         Log.d("HomeScreen", "Camera Permission: $isGranted")
+        if (!isGranted) {
+            Toast.makeText(context, "Izin kamera ditolak.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // Pemanggilan fungsi ketika gambar dari kamera berhasil diambil
@@ -91,17 +95,21 @@ fun HomeScreen(
 
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             val data = result.data
-
             val imageBitmap: Bitmap? = data?.extras?.get("data") as? Bitmap
             if (imageBitmap != null) {
-                processImage(imageBitmap)  // Proses gambar
+                processImage(imageBitmap)
             } else {
                 Log.e("HomeScreen", "Failed to capture image: Bitmap is null")
+                errorMessage = "Gagal mengambil gambar."
             }
         } else {
             Log.e("HomeScreen", "Image capture failed: Result code is not OK")
+            errorMessage = "Pengambilan gambar dibatalkan."
         }
     }
+
+    // Mendapatkan HistoryViewModel
+    val historyViewModel: HistoryViewModel = viewModel()
 
     // Setup PredictionHelper ketika komponen dimulai
     LaunchedEffect(Unit) {
@@ -111,16 +119,23 @@ fun HomeScreen(
                 errorMessage = null
                 Log.d("HomeScreen", "Prediction result: Kelas $predictedClass dengan confidence: $confidence")
 
-                // Menambahkan TTS setelah hasil prediksi dengan format yang diinginkan
+                // Mapping kelas ke nominal
+                val nominal = getNominal(predictedClass)
+
+                // Menggunakan TTS untuk mengucapkan hasil dengan format nominal
                 textToSpeech.speak(
-                    "Hasil prediksi adalah. Kelas $predictedClass dengan confidence ${"%.2f".format(confidence * 100)} persen.",
+                    "Hasil prediksi adalah. Nominal $nominal  dengan confidence ${"%.2f".format(confidence * 100)} persen.",
                     TextToSpeech.QUEUE_FLUSH,
                     null,
                     null
                 )
 
-                // Panggil callback untuk menavigasi ke ResultScreen
+                // Memanggil callback untuk menavigasi ke ResultScreen
+                Log.d("HomeScreen", "Memanggil onPredictionResult dengan kelas: $predictedClass dan confidence: $confidence")
                 onPredictionResult(predictedClass, confidence)
+
+                // Menambahkan history ke Firestore dan Room
+                historyViewModel.addHistory(nominal, confidence)
             },
             onError = { error ->
                 errorMessage = error
@@ -141,15 +156,7 @@ fun HomeScreen(
         Text(text = "Home Screen", color = MaterialTheme.colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                // Navigasi ke CreateHistoryScreen
-                navController.navigate("create_history_screen")
-            },
-            modifier = Modifier.padding(bottom = 8.dp)
-        ) {
-            Text(text = "Go to Create History")
-        }
+
 
         Button(
             onClick = {
@@ -159,6 +166,8 @@ fun HomeScreen(
         ) {
             Text(text = "Go to List History")
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Tombol untuk membuka kamera
         Button(
@@ -182,7 +191,8 @@ fun HomeScreen(
             Text(text = "Signout")
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
 
         // Tampilkan pesan error jika ada
         errorMessage?.let {
@@ -191,9 +201,27 @@ fun HomeScreen(
     }
 }
 
-// Fungsi untuk mengonversi Bitmap ke ByteBuffer
+/**
+ * Fungsi untuk memetakan kelas ke nominal.
+ */
+fun getNominal(classIndex: String): String {
+    return when (classIndex.toIntOrNull()) {
+        0 -> "1.000"
+        1 -> "2.000"
+        2 -> "5.000"
+        3 -> "10.000"
+        4 -> "20.000"
+        5 -> "50.000"
+        6 -> "100.000"
+        else -> "Unknown"
+    }
+}
+
+/**
+ * Fungsi untuk mengonversi Bitmap ke ByteBuffer
+ */
 fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
-    val inputSize = 224  // Ukuran gambar input
+    val inputSize = 224
     val byteBuffer = ByteBuffer.allocateDirect(4 * inputSize * inputSize * 3)
     byteBuffer.order(ByteOrder.nativeOrder())
 
@@ -201,9 +229,9 @@ fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
     for (i in 0 until inputSize) {
         for (j in 0 until inputSize) {
             val pixel = scaledBitmap.getPixel(i, j)
-            byteBuffer.putFloat(((pixel shr 16) and 0xFF) / 255.0f)
-            byteBuffer.putFloat(((pixel shr 8) and 0xFF) / 255.0f)
-            byteBuffer.putFloat((pixel and 0xFF) / 255.0f)
+            byteBuffer.putFloat(((pixel shr 16) and 0xFF) / 255.0f)  // R
+            byteBuffer.putFloat(((pixel shr 8) and 0xFF) / 255.0f)   // G
+            byteBuffer.putFloat((pixel and 0xFF) / 255.0f)           // B
         }
     }
 

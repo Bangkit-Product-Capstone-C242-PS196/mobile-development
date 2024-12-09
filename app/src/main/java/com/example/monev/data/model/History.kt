@@ -10,5 +10,6 @@ data class History(
     val userId: String = "", // ID pengguna
     val nominal: String = "",
     val date: String = "",
+    val confidence: Float = 0f,
     val photo: String = ""
 )
