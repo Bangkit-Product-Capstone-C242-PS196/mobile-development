@@ -173,7 +173,6 @@ fun Navigation(modifier: Modifier = Modifier) {
             }
 
             // SettingScreen (dengan BottomBar)
-            // SettingScreen (dengan BottomBar)
             composable(Destinations.SettingScreen.route) {
                 SettingScreen(
                     navController = navController,
