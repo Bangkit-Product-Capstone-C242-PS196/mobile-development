@@ -12,7 +12,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.monev.helper.PredictionHelper
@@ -38,7 +41,8 @@ import java.nio.ByteOrder
 fun HomeScreen(
     navController: NavController,
     userData: UserData? = null,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onPredictionResult: (String, Float) -> Unit
 ) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
@@ -47,7 +51,6 @@ fun HomeScreen(
         )
     }
 
-    var predictionResult by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     var predictionHelper by remember { mutableStateOf<PredictionHelper?>(null) }
@@ -73,11 +76,11 @@ fun HomeScreen(
     }
 
     // Request permission untuk akses kamera
-    val launcher = rememberLauncherForActivityResult(
+    val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         hasCameraPermission = isGranted
-        Log.d("HomeScreen", "Camera Permission: $isGranted")  // Log izin kamera
+        Log.d("HomeScreen", "Camera Permission: $isGranted")
     }
 
     // Pemanggilan fungsi ketika gambar dari kamera berhasil diambil
@@ -103,20 +106,24 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         predictionHelper = PredictionHelper(
             context = context,
-            onResult = { result ->
-                predictionResult = result
+            onResult = { predictedClass, confidence ->
                 errorMessage = null
-                Log.d("HomeScreen", "Prediction result: $result")  // Log hasil prediksi
+                Log.d("HomeScreen", "Prediction result: Kelas $predictedClass dengan confidence: $confidence")
 
-                // Menambahkan TTS setelah hasil prediksi
-                predictionResult?.let { result ->
-                    textToSpeech.speak(result, TextToSpeech.QUEUE_FLUSH, null, null)
-                }
+                // Menambahkan TTS setelah hasil prediksi dengan format yang diinginkan
+                textToSpeech.speak(
+                    "Hasil prediksi adalah. Kelas $predictedClass dengan confidence ${"%.2f".format(confidence * 100)} persen.",
+                    TextToSpeech.QUEUE_FLUSH,
+                    null,
+                    null
+                )
+
+                // Panggil callback untuk menavigasi ke ResultScreen
+                onPredictionResult(predictedClass, confidence)
             },
             onError = { error ->
-                predictionResult = null
                 errorMessage = error
-                Log.e("HomeScreen", "Prediction error: $error")  // Log error prediksi
+                Log.e("HomeScreen", "Prediction error: $error")
             }
         )
     }
@@ -125,11 +132,14 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Home Screen", color = MaterialTheme.colorScheme.onBackground)
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Tombol untuk membuka kamera
         Button(
@@ -138,7 +148,7 @@ fun HomeScreen(
                     val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                     cameraLauncher.launch(intent)
                 } else {
-                    launcher.launch(Manifest.permission.CAMERA)
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
                 }
             },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -146,18 +156,14 @@ fun HomeScreen(
             Text(text = "Open Camera")
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         // Tombol untuk sign-out
         Button(onClick = onSignOut) {
             Text(text = "Signout")
         }
 
-        // Tampilkan hasil prediksi jika ada
-        predictionResult?.let {
-            Text(
-                text = "Prediction: $it",
-                fontSize = 30.sp
-            )
-        }
+        Spacer(modifier = Modifier.height(32.dp))
 
         // Tampilkan pesan error jika ada
         errorMessage?.let {
@@ -166,6 +172,7 @@ fun HomeScreen(
     }
 }
 
+// Fungsi untuk mengonversi Bitmap ke ByteBuffer
 fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
     val inputSize = 224  // Ukuran gambar input
     val byteBuffer = ByteBuffer.allocateDirect(4 * inputSize * inputSize * 3)
@@ -175,9 +182,9 @@ fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
     for (i in 0 until inputSize) {
         for (j in 0 until inputSize) {
             val pixel = scaledBitmap.getPixel(i, j)
-            byteBuffer.putFloat(((pixel shr 16) and 0xFF) / 255.0f)  // R
-            byteBuffer.putFloat(((pixel shr 8) and 0xFF) / 255.0f)   // G
-            byteBuffer.putFloat((pixel and 0xFF) / 255.0f)           // B
+            byteBuffer.putFloat(((pixel shr 16) and 0xFF) / 255.0f)
+            byteBuffer.putFloat(((pixel shr 8) and 0xFF) / 255.0f)
+            byteBuffer.putFloat((pixel and 0xFF) / 255.0f)
         }
     }
 

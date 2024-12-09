@@ -17,20 +17,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.monev.sign_in.GoogleAuthUiClient
-import com.example.monev.ui.screens.auth.SignInScreen
-import com.example.monev.viewmodel.auth.SignInViewModel
 import com.example.monev.ui.screens.account.AccountScreen
+import com.example.monev.ui.screens.auth.SignInScreen
 import com.example.monev.ui.screens.chatbot.ChatbotScreen
 import com.example.monev.ui.screens.home.HomeScreen
+import com.example.monev.ui.screens.result.ResultScreen
 import com.example.monev.ui.screens.setting.SettingScreen
 import com.example.monev.ui.screens.welcome.WelcomeScreen
+import com.example.monev.viewmodel.auth.SignInViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun Navigation(modifier: Modifier = Modifier) {
@@ -38,7 +40,6 @@ fun Navigation(modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
-
 
     val googleAuthUiClient = GoogleAuthUiClient(
         context = LocalContext.current.applicationContext,
@@ -55,7 +56,6 @@ fun Navigation(modifier: Modifier = Modifier) {
     // Cek apakah pengguna sudah login
     val isUserSignedIn = googleAuthUiClient.getSignedInUser() != null
 
-
     // State untuk menyimpan rute saat ini
     val currentRoute = remember { mutableStateOf<String?>(null) }
 
@@ -68,7 +68,7 @@ fun Navigation(modifier: Modifier = Modifier) {
 
     Scaffold(
         bottomBar = {
-            // Tampilkan BottomBar hanya di HomeScreen dan SettingScreen
+            // Tampilkan BottomBar hanya di rute tertentu
             if (currentRoute.value in screensWithBottomBar) {
                 MyBottomBar(navController = navController)
             }
@@ -152,12 +152,18 @@ fun Navigation(modifier: Modifier = Modifier) {
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            // Navigasi kembali ke SignInScreen setelah sign-out
+                            // Navigasi kembali ke WelcomeScreen setelah sign-out
                             navController.navigate(Destinations.WelcomeScreen.route) {
                                 // Menghapus semua rute sebelumnya dari stack
                                 popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
                             }
                         }
+                    },
+                    onPredictionResult = { prediction, confidence ->  // Callback dengan dua parameter
+                        // Navigasi ke ResultScreen dengan data prediksi
+                        navController.navigate(
+                            Destinations.ResultScreen.createRoute(prediction, confidence)
+                        )
                     }
                 )
             }
@@ -175,15 +181,14 @@ fun Navigation(modifier: Modifier = Modifier) {
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            // Navigasi kembali ke SignInScreen setelah sign-out
+                            // Navigasi kembali ke WelcomeScreen setelah sign-out
                             navController.navigate(Destinations.WelcomeScreen.route) {
                                 // Menghapus semua rute sebelumnya dari stack
                                 popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
                             }
                         }
                     }
-
-                    )
+                )
             }
 
             // Chatbot Screen
@@ -191,7 +196,7 @@ fun Navigation(modifier: Modifier = Modifier) {
                 ChatbotScreen(navController = navController)
             }
 
-            // account Screen
+            // Account Screen
             composable(Destinations.AccountScreen.route) {
                 AccountScreen(
                     navController = navController,
@@ -205,13 +210,31 @@ fun Navigation(modifier: Modifier = Modifier) {
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            // Navigasi kembali ke SignInScreen setelah sign-out
+                            // Navigasi kembali ke WelcomeScreen setelah sign-out
                             navController.navigate(Destinations.WelcomeScreen.route) {
                                 // Menghapus semua rute sebelumnya dari stack
                                 popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
                             }
                         }
                     }
+                )
+            }
+
+            // Result Screen
+            composable(
+                route = "ResultScreen/{predictionResult}/{confidence}",
+                arguments = listOf(
+                    navArgument("predictionResult") { type = NavType.StringType },
+                    navArgument("confidence") { type = NavType.FloatType }
+                )
+            ) { backStackEntry ->
+                val predictionResult = backStackEntry.arguments?.getString("predictionResult") ?: "Unknown"
+                val confidence = backStackEntry.arguments?.getFloat("confidence") ?: 0.0f
+
+                ResultScreen(
+                    navController = navController,
+                    predictionResult = predictionResult,
+                    confidence = confidence
                 )
             }
         }

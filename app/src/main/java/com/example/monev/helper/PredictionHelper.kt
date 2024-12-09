@@ -17,7 +17,7 @@ import java.nio.ByteBuffer
 class PredictionHelper(
     private val modelName: String = "modelv1.tflite",
     val context: Context,
-    private val onResult: (String) -> Unit,
+    private val onResult: (String, Float) -> Unit,  // Dua parameter: kelas dan confidence
     private val onError: (String) -> Unit,
 ) {
     private var interpreter: InterpreterApi? = null
@@ -52,12 +52,12 @@ class PredictionHelper(
             .build()
 
         FirebaseModelDownloader.getInstance()
-            .getModel("modelv1", DownloadType.LOCAL_MODEL, conditions)
+            .getModel("modelv2", DownloadType.LOCAL_MODEL, conditions)
             .addOnSuccessListener { model: CustomModel ->
                 try {
                     // Inisialisasi model dan interpreter setelah model berhasil diunduh
                     initializeInterpreter(model)
-                    onDownloadSuccess()  // Beri tahu jika model berhasil diunduh
+                    onDownloadSuccess()
                 } catch (e: IOException) {
                     onError("Model initialization failed: ${e.message}")
                 }
@@ -82,7 +82,7 @@ class PredictionHelper(
                     interpreter = InterpreterApi.create(it, options)
                 }
             }
-            isModelReady = true  // Tandai bahwa model sudah siap digunakan
+            isModelReady = true
         } catch (e: Exception) {
             onError("Interpreter initialization failed: ${e.message}")
             Log.e(TAG, e.message.toString())
@@ -97,7 +97,7 @@ class PredictionHelper(
         }
 
         // Tentukan ukuran output sesuai dengan model Anda
-        val outputArray = Array(1) { FloatArray(7) }  // Output shape (1, 7)
+        val outputArray = Array(1) { FloatArray(7) }
 
         try {
             // Lakukan prediksi
@@ -107,8 +107,10 @@ class PredictionHelper(
             val prediction = outputArray[0]  // Ambil hasil untuk satu batch
             Log.d(TAG, "Full prediction array: ${prediction.joinToString()}")
 
-            val predictedClass = prediction.indexOfFirst { it == prediction.maxOrNull() }  // Kelas dengan nilai tertinggi
-            onResult("Predicted class: $predictedClass with confidence: ${prediction[predictedClass]}")
+            val predictedClass = prediction.indexOfFirst { it == prediction.maxOrNull() }
+            val confidence = prediction[predictedClass]
+
+            onResult(predictedClass.toString(), confidence)
         } catch (e: Exception) {
             onError("Prediction failed: ${e.message}")
             Log.e(TAG, e.message.toString())
