@@ -173,9 +173,11 @@ fun Navigation(modifier: Modifier = Modifier) {
             }
 
             // SettingScreen (dengan BottomBar)
+            // SettingScreen (dengan BottomBar)
             composable(Destinations.SettingScreen.route) {
                 SettingScreen(
                     navController = navController,
+                    userData = googleAuthUiClient.getSignedInUser(), // Pass the userData here
                     onSignOut = {
                         coroutineScope.launch {
                             googleAuthUiClient.signOut()
@@ -192,8 +194,7 @@ fun Navigation(modifier: Modifier = Modifier) {
                             }
                         }
                     }
-
-                    )
+                )
             }
 
             // Chatbot Screen
