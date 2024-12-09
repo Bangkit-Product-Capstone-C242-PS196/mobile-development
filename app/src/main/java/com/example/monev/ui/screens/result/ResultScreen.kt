@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.util.Log
@@ -47,6 +49,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.focused
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -145,6 +150,14 @@ fun ResultScreen(
 
                 // Menambahkan history ke Firestore dan Room
                 viewModel.addHistory(nominal, confidenceValue)
+
+                // Delay sedikit agar TalkBack selesai membaca TTS
+                Handler(Looper.getMainLooper()).postDelayed({
+                    // Navigasi ke HomeScreen setelah TTS selesai
+                    navController.navigate(Destinations.HomeScreen.route) {
+                        popUpTo("home_screen") { inclusive = true }
+                    }
+                }, 2000)  // Delay 2 detik
             },
             onError = { error ->
                 errorMessage = error
@@ -192,9 +205,14 @@ fun ResultScreen(
                             // Ikon Prediksi
                             Icon(
                                 imageVector = Icons.Default.Info,
-                                contentDescription = "Prediksi",
+                                contentDescription = "",  // Menggunakan string kosong agar TalkBack tidak membaca
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(64.dp)
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .semantics {
+                                        // Mencegah TalkBack membaca elemen ini
+                                        focused = false
+                                    }
                             )
 
                             // Menampilkan Nominal
@@ -204,9 +222,10 @@ fun ResultScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = "$currentNominal ribu",
+                                text = "$currentNominal",
                                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.semantics { contentDescription = "Nominal Prediksi: $currentNominal" }
                             )
 
                             // Menampilkan Confidence

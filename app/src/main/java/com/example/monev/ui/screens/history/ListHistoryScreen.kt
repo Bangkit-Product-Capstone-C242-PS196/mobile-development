@@ -1,5 +1,6 @@
 package com.example.monev.ui.screens.history
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -286,8 +288,16 @@ fun PointsCard(totalItems: Int) {
 
 @Composable
 fun HistoryItem(history: History) {
+    // Deskripsi konten untuk TalkBack
+    var contentDescription = "Nominal: ${history.nominal} , Confidence: ${"%.2f".format(history.confidence * 100)}%, Tanggal: ${formatDate(history.date)}"
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = {  })
+            .semantics {
+                contentDescription = contentDescription
+            },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -303,7 +313,7 @@ fun HistoryItem(history: History) {
         ) {
             // Menampilkan Nominal
             Text(
-                text = "Nominal: ${history.nominal} ribu",
+                text = "Nominal: ${history.nominal} ",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
 
@@ -315,13 +325,7 @@ fun HistoryItem(history: History) {
             )
 
             // Menampilkan Tanggal
-            val formattedDate = try {
-                val timestamp = history.date.toLongOrNull() ?: 0L
-                val sdf = java.text.SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault())
-                sdf.format(Date(timestamp))
-            } catch (e: Exception) {
-                "Invalid Date"
-            }
+            val formattedDate = formatDate(history.date)
             Text(
                 text = "Tanggal: $formattedDate",
                 style = MaterialTheme.typography.bodySmall,
@@ -330,6 +334,20 @@ fun HistoryItem(history: History) {
         }
     }
 }
+
+/**
+ * Fungsi untuk memformat tanggal menjadi string yang mudah dibaca
+ */
+fun formatDate(date: String): String {
+    return try {
+        val timestamp = date.toLongOrNull() ?: 0L
+        val sdf = java.text.SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault())
+        sdf.format(Date(timestamp))
+    } catch (e: Exception) {
+        "Invalid Date"
+    }
+}
+
 
 // Fungsi untuk mendapatkan nomor bulan dari nama bulan
 fun getMonthNumber(monthName: String): Int? {
