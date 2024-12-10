@@ -40,7 +40,7 @@ fun SplashScreen(navController: NavController) {
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.monev),
+            painter = painterResource(id = R.drawable.img_monev),
             contentDescription = "Monev Logo",
             modifier = Modifier
                 .scale(scale.value)

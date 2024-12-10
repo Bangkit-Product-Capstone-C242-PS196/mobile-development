@@ -11,6 +11,7 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -37,6 +38,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import coil.compose.AsyncImage
 import com.example.monev.sign_in.UserData
+import com.example.monev.ui.navigation.Destinations
 import com.example.monev.utils.PreferenceManager
 import com.example.monev.worker.DailyReminderWorker
 import java.util.concurrent.TimeUnit

@@ -181,20 +181,13 @@ fun Navigation(modifier: Modifier = Modifier) {
                 )
             }
 
-            // history screen
-            animatedComposable("create_history_screen") {
-                CreateHistoryScreen(navController = navController)
-            }
-
             // about us
-            composable(Destinations.AboutScreen.route) {
+            animatedComposable(Destinations.AboutScreen.route) {
                 AboutScreen(navController = navController)
             }
-
-            // composable("list_history_screen") {
+            // list history
             animatedComposable("list_history_screen") {
                 ListHistoryScreen(navController = navController)
-                }
             }
 
             // HomeScreen (dengan BottomBar)
@@ -225,7 +218,7 @@ fun Navigation(modifier: Modifier = Modifier) {
             composable(Destinations.SettingScreen.route) {
                 SettingScreen(
                     navController = navController,
-                    userData = googleAuthUiClient.getSignedInUser(),
+                    userData = googleAuthUiClient.getSignedInUser(), // Pass the userData here
                     onSignOut = {
                         coroutineScope.launch {
                             googleAuthUiClient.signOut()

@@ -28,7 +28,7 @@ fun createNotificationChannel(context: Context) {
 fun showDailyNotification(context: Context, title: String, message: String) {
     createNotificationChannel(context)
     val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-        .setSmallIcon(R.drawable.monev)
+        .setSmallIcon(R.drawable.img_monev)
         .setContentTitle(title)
         .setContentText(message)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
