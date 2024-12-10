@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.monev.data.model.History
@@ -59,6 +60,10 @@ fun ListHistoryScreen(
     dataViewModel: HistoryViewModel = viewModel(),
     navController: NavController
 ) {
+
+    // warna
+    val colorScheme = MaterialTheme.colorScheme
+
     val allData by dataViewModel.histories.collectAsState()
 
     // State untuk dropdown menu
@@ -102,10 +107,10 @@ fun ListHistoryScreen(
     Scaffold(
         topBar = {
             SmallTopAppBar(
-                title = { Text("Riwayat Scan") },
+                title = { Text("Riwayat Scan", color = colorScheme.scrim) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = colorScheme.scrim)
                     }
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -223,7 +228,9 @@ fun ListHistoryScreen(
             // Header Teks
             Text(
                 text = "Riwayat Scan",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                color = colorScheme.onBackground,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
             )
 
             // Daftar History
