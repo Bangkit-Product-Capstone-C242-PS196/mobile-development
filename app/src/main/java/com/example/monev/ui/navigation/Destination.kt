@@ -12,5 +12,9 @@ sealed class Destinations (val route: String) {
     data object ProfileScreen: Destinations("ProfileScreen")
     data object SignInScreen: Destinations("SignInScreen")
 
+    // about
+    data object AboutScreen: Destinations("AboutScreen")
+
+
 
 }
