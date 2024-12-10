@@ -6,6 +6,11 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -17,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -31,9 +38,44 @@ import com.example.monev.ui.screens.history.ListHistoryScreen
 import com.example.monev.ui.screens.home.HomeScreen
 import com.example.monev.ui.screens.setting.SettingScreen
 import com.example.monev.ui.screens.welcome.WelcomeScreen
+import com.example.monev.ui.splash.SplashScreen
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
+fun NavGraphBuilder.animatedComposable(
+    route: String,
+    content: @Composable (NavBackStackEntry) -> Unit
+) {
+    composable(
+        route = route,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                animationSpec = tween(300, easing = EaseOut)
+            ) + fadeIn(animationSpec = tween(300))
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                animationSpec = tween(300, easing = EaseOut)
+            ) + fadeOut(animationSpec = tween(300))
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                animationSpec = tween(300, easing = EaseOut)
+            ) + fadeIn(animationSpec = tween(300))
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                animationSpec = tween(300, easing = EaseOut)
+            ) + fadeOut(animationSpec = tween(300))
+        }
+    ) { navBackStackEntry ->
+        content(navBackStackEntry)
+    }
+}
 
 @Composable
 fun Navigation(modifier: Modifier = Modifier) {
@@ -41,7 +83,6 @@ fun Navigation(modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
-
 
     val googleAuthUiClient = GoogleAuthUiClient(
         context = LocalContext.current.applicationContext,
@@ -57,7 +98,6 @@ fun Navigation(modifier: Modifier = Modifier) {
 
     // Cek apakah pengguna sudah login
     val isUserSignedIn = googleAuthUiClient.getSignedInUser() != null
-
 
     // State untuk menyimpan rute saat ini
     val currentRoute = remember { mutableStateOf<String?>(null) }
@@ -79,11 +119,11 @@ fun Navigation(modifier: Modifier = Modifier) {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = if (isUserSignedIn) Destinations.HomeScreen.route else Destinations.WelcomeScreen.route,
+            startDestination = if (isUserSignedIn) Destinations.HomeScreen.route else Destinations.SplashScreen.route,
             modifier = Modifier.padding(paddingValues)
         ) {
             // WelcomeScreen (tanpa BottomBar)
-            composable(Destinations.WelcomeScreen.route) {
+            animatedComposable(Destinations.WelcomeScreen.route) {
                 WelcomeScreen(onNextClick = {
                     navController.navigate(Destinations.SignInScreen.route) {
                         popUpTo(Destinations.SignInScreen.route) { inclusive = true }
@@ -92,7 +132,7 @@ fun Navigation(modifier: Modifier = Modifier) {
             }
 
             // SignIn Screen
-            composable(Destinations.SignInScreen.route) {
+            animatedComposable(Destinations.SignInScreen.route) {
                 val viewModel = viewModel<SignInViewModel>()
                 val state = viewModel.state.collectAsStateWithLifecycle().value
 
@@ -120,7 +160,7 @@ fun Navigation(modifier: Modifier = Modifier) {
                     if (state.isSignInSuccesful) {
                         Toast.makeText(
                             context,
-                            "Sign In Sukses",
+                            "Sign In Success",
                             Toast.LENGTH_LONG
                         ).show()
                         navController.navigate(Destinations.HomeScreen.route)
@@ -141,17 +181,12 @@ fun Navigation(modifier: Modifier = Modifier) {
                 )
             }
 
-            // history screen
-            composable("create_history_screen") {
-                CreateHistoryScreen(navController = navController)
-            }
-
             // about us
-            composable(Destinations.AboutScreen.route) {
+            animatedComposable(Destinations.AboutScreen.route) {
                 AboutScreen(navController = navController)
             }
-
-            composable("list_history_screen") {
+            // list history
+            animatedComposable("list_history_screen") {
                 ListHistoryScreen(navController = navController)
             }
 
@@ -183,7 +218,7 @@ fun Navigation(modifier: Modifier = Modifier) {
             composable(Destinations.SettingScreen.route) {
                 SettingScreen(
                     navController = navController,
-                    userData = googleAuthUiClient.getSignedInUser(),
+                    userData = googleAuthUiClient.getSignedInUser(), // Pass the userData here
                     onSignOut = {
                         coroutineScope.launch {
                             googleAuthUiClient.signOut()
@@ -230,6 +265,11 @@ fun Navigation(modifier: Modifier = Modifier) {
                         }
                     }
                 )
+            }
+
+            // Navigation.kt
+            animatedComposable("SplashScreen") {
+                SplashScreen(navController = navController)
             }
         }
     }

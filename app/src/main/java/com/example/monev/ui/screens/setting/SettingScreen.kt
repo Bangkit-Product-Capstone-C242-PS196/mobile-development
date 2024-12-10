@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -34,7 +33,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
@@ -74,7 +72,7 @@ fun SettingScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Setting",
+                            text = "SETTING",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = colorScheme.onPrimaryContainer,
                             textAlign = TextAlign.Center
@@ -99,10 +97,6 @@ fun SettingScreen(
         ) {
             // Profile Header
             ProfileHeader(userData)
-
-            // Status Section
-//            StatusSection()
-
 
             // Setting Section
             SettingSection(context, requestPermissionLauncher, navController)
@@ -143,43 +137,10 @@ fun ProfileHeader(userData: UserData?) {
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium
             )
-
         }
 
     }
 }
-
-//@Composable
-//fun StatusSection() {
-//    Text(
-//        text = "My Status",
-//        color = Color.Gray,
-//        modifier = Modifier.padding(vertical = 8.dp)
-//    )
-//    Row(
-//        horizontalArrangement = Arrangement.spacedBy(8.dp)
-//    ) {
-//        StatusChip(
-//            text = "Away",
-//            icon = Icons.Default.Mood,
-//            backgroundColor = Color.Black,
-//            textColor = Color.White
-//        )
-//        StatusChip(
-//            text = "At Work",
-//            icon = Icons.Default.Work,
-//            backgroundColor = Color(0xFFE6F3E6),
-//            textColor = Color(0xFF2E7D32)
-//        )
-//        StatusChip(
-//            text = "Gaming",
-//            icon = Icons.Default.SportsEsports,
-//            backgroundColor = Color(0xFFFFF3E0),
-//            textColor = Color(0xFFFF9800)
-//        )
-//    }
-//}
-
 
 @Composable
 fun SettingSection(
@@ -192,7 +153,7 @@ fun SettingSection(
     var isNotificationEnabled by remember { mutableStateOf(preferenceManager.getNotificationStatus()) }
 
     fun startDailyReminderWorker() {
-        val dailyReminderRequest: WorkRequest = PeriodicWorkRequestBuilder<DailyReminderWorker>(1, TimeUnit.DAYS).build()
+        val dailyReminderRequest: WorkRequest = PeriodicWorkRequestBuilder<DailyReminderWorker>(7, TimeUnit.DAYS).build()
         WorkManager.getInstance(context).enqueue(dailyReminderRequest)
     }
 
@@ -290,39 +251,6 @@ fun AccountSection(onSignOut: () -> Unit) {
             text = "Log Out",
             color = Color.Red
         )
-    }
-}
-
-@Composable
-fun StatusChip(
-    text: String,
-    icon: ImageVector,
-    backgroundColor: Color,
-    textColor: Color
-) {
-    Surface(
-        color = backgroundColor,
-        shape = MaterialTheme.shapes.large,
-        modifier = Modifier.height(40.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                icon,
-                contentDescription = text,
-                tint = textColor,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = text,
-                color = textColor,
-                fontSize = 14.sp
-            )
-        }
     }
 }
 
