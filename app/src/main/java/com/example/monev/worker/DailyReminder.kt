@@ -42,7 +42,7 @@ fun showDailyNotification(context: Context, title: String, message: String) {
 
 class DailyReminderWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     override fun doWork(): Result {
-        showDailyNotification(applicationContext, "Daily Reminder", "Don't forget to check your monthly history!")
+        showDailyNotification(applicationContext, "Daily Reminder", "Don't forget to check your daily history!")
         return Result.success()
     }
 }

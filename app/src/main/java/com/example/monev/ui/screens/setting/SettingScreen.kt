@@ -49,9 +49,9 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun SettingScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
     userData: UserData?,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    navController: NavController
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val context = LocalContext.current
@@ -105,7 +105,7 @@ fun SettingScreen(
 
 
             // Setting Section
-            SettingSection(context, requestPermissionLauncher)
+            SettingSection(context, requestPermissionLauncher, navController)
 
             // Account Section
             AccountSection(onSignOut)
@@ -143,18 +143,9 @@ fun ProfileHeader(userData: UserData?) {
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium
             )
-            Text(
-                text = "Senior Designer",
-                color = Color.Gray
-            )
+
         }
-        IconButton(onClick = { /* Edit profile */ }) {
-            Icon(
-                Icons.Default.Edit,
-                contentDescription = "Edit Profile",
-                tint = Color.Gray
-            )
-        }
+
     }
 }
 
@@ -193,7 +184,9 @@ fun ProfileHeader(userData: UserData?) {
 @Composable
 fun SettingSection(
     context: Context,
-    requestPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>
+    requestPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
+    navController: NavController,
+
 ) {
     val preferenceManager = remember { PreferenceManager(context) }
     var isNotificationEnabled by remember { mutableStateOf(preferenceManager.getNotificationStatus()) }
@@ -204,11 +197,12 @@ fun SettingSection(
     }
 
     Text(
-        text = "Settings",
+        text = "Pengaturan",
         color = Color.Gray,
         modifier = Modifier.padding(vertical = 8.dp)
     )
 
+    // notif
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -225,14 +219,14 @@ fun SettingSection(
             ) {
                 Icon(
                     Icons.Default.Notifications,
-                    contentDescription = "Notifications",
+                    contentDescription = "Notifikasi",
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "Enable Notifications",
+                text = "Nyalakan Notifikasi",
                 fontSize = 16.sp,
                 modifier = Modifier.weight(1f)
             )
@@ -248,6 +242,40 @@ fun SettingSection(
                 }
             }
         )
+    }
+
+    // about us
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .padding(end = 16.dp)
+            .clickable {
+                navController.navigate(Destinations.AboutScreen.route)
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color.Blue, shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = "Tentang Kami",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Tentang Kami",
+                fontSize = 16.sp,
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 

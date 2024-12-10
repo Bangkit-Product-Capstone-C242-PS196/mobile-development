@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.monev.sign_in.GoogleAuthUiClient
+import com.example.monev.ui.screens.about.AboutScreen
 import com.example.monev.ui.screens.auth.SignInScreen
 import com.example.monev.viewmodel.auth.SignInViewModel
 import com.example.monev.ui.screens.account.AccountScreen
@@ -144,6 +145,12 @@ fun Navigation(modifier: Modifier = Modifier) {
             composable("create_history_screen") {
                 CreateHistoryScreen(navController = navController)
             }
+
+            // about us
+            composable(Destinations.AboutScreen.route) {
+                AboutScreen(navController = navController)
+            }
+
             composable("list_history_screen") {
                 ListHistoryScreen(navController = navController)
             }
@@ -176,7 +183,7 @@ fun Navigation(modifier: Modifier = Modifier) {
             composable(Destinations.SettingScreen.route) {
                 SettingScreen(
                     navController = navController,
-                    userData = googleAuthUiClient.getSignedInUser(), // Pass the userData here
+                    userData = googleAuthUiClient.getSignedInUser(),
                     onSignOut = {
                         coroutineScope.launch {
                             googleAuthUiClient.signOut()
