@@ -28,7 +28,7 @@ fun createNotificationChannel(context: Context) {
 fun showDailyNotification(context: Context, title: String, message: String) {
     createNotificationChannel(context)
     val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_launcher_foreground) // Use a valid icon
+        .setSmallIcon(R.drawable.monev)
         .setContentTitle(title)
         .setContentText(message)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -42,7 +42,7 @@ fun showDailyNotification(context: Context, title: String, message: String) {
 
 class DailyReminderWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     override fun doWork(): Result {
-        showDailyNotification(applicationContext, "Daily Reminder", "Don't forget to check your monthly history!")
+        showDailyNotification(applicationContext, "Daily Reminder", "Don't forget to check your history!")
         return Result.success()
     }
 }
