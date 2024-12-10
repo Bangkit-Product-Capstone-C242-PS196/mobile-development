@@ -12,17 +12,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -39,12 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -168,7 +153,6 @@ fun ResultScreen(
 
     // UI
     Scaffold(
-
         content = { paddingValues ->
             Box(
                 modifier = Modifier
@@ -178,11 +162,14 @@ fun ResultScreen(
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
+                    verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Spacer untuk mengisi ruang di atas agar card berada di tengah
+                    Spacer(modifier = Modifier.weight(1f))
+
                     // Card untuk Menampilkan Hasil Prediksi
                     Card(
                         modifier = Modifier
@@ -194,18 +181,16 @@ fun ResultScreen(
                         )
                     ) {
                         Column(
-
                             modifier = Modifier
                                 .padding(24.dp)
-                                .fillMaxWidth()
-                            ,
+                                .fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             // Ikon Prediksi
                             Icon(
                                 imageVector = Icons.Default.Info,
-                                contentDescription = "",  // Menggunakan string kosong agar TalkBack tidak membaca
+                                contentDescription = "",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .size(64.dp)
@@ -242,69 +227,70 @@ fun ResultScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    // Spacer untuk mengisi ruang di bawah card
+                    Spacer(modifier = Modifier.weight(1f))
 
-
-                    // Tombol "Scan Ulang"
-                    Button(
-                        onClick = {
-                            // Cek izin kamera
-                            when {
-                                ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CAMERA
-                                ) == PackageManager.PERMISSION_GRANTED -> {
-                                    // Izin kamera sudah diberikan, buka kamera
-                                    cameraLauncher.launch(Intent(MediaStore.ACTION_IMAGE_CAPTURE))
-                                }
-                                else -> {
-                                    // Meminta izin kamera
-                                    permissionLauncher.launch(Manifest.permission.CAMERA)
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                    // Column untuk Menempatkan Tombol di Bawah
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Scan Ulang",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Scan Ulang", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                        // Tombol "Scan Ulang"
+                        Button(
+                            onClick = {
+                                // Cek izin kamera
+                                when {
+                                    ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.CAMERA
+                                    ) == PackageManager.PERMISSION_GRANTED -> {
+                                        // Izin kamera sudah diberikan, buka kamera
+                                        cameraLauncher.launch(Intent(MediaStore.ACTION_IMAGE_CAPTURE))
+                                    }
+                                    else -> {
+                                        // Meminta izin kamera
+                                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Scan Ulang",
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Scan Ulang", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                        }
+
+                        // Tombol "Kembali ke Home"
+                        Button(
+                            onClick = {
+                                // Navigasi kembali ke HomeScreen tanpa membuka kamera
+                                navController.navigate(Destinations.HomeScreen.route) {
+                                    popUpTo("home_screen") { inclusive = true }
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Home,
+                                contentDescription = "Home",
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Kembali ke Home", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                        }
                     }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Tombol "Kembali ke Home"
-                    Button(
-                        onClick = {
-                            // Navigasi kembali ke HomeScreen tanpa membuka kamera
-                            navController.navigate(Destinations.HomeScreen.route) {
-                                popUpTo("home_screen") { inclusive = true }
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = "Home",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Kembali ke Home", fontSize = 18.sp, fontWeight = FontWeight.Medium)
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
 
                     // Tampilkan pesan error jika ada dalam bentuk AlertDialog
                     errorMessage?.let { error ->

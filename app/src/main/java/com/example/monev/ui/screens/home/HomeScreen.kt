@@ -10,15 +10,25 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,25 +39,35 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import com.example.monev.R
 import com.example.monev.helper.PredictionHelper
 import com.example.monev.sign_in.UserData
 import com.example.monev.viewmodel.history.HistoryViewModel
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.Calendar
 
 @Composable
 fun HomeScreen(
     navController: NavController,
     userData: UserData? = null,
     onSignOut: () -> Unit,
-    onPredictionResult: (String, Float) -> Unit  // Tambahkan parameter ini
+    onPredictionResult: (String, Float) -> Unit
 ) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
@@ -69,7 +89,7 @@ fun HomeScreen(
         }
     } }
 
-    // Fungsi untuk memproses gambar yang diambil dan membuat prediksi
+    // Function to process captured image and make prediction
     fun processImage(bitmap: Bitmap) {
         if (predictionHelper != null) {
             val imageByteBuffer = convertBitmapToByteBuffer(bitmap)
@@ -79,7 +99,7 @@ fun HomeScreen(
         }
     }
 
-    // Request permission untuk akses kamera
+    // Request permission for camera access
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -90,7 +110,7 @@ fun HomeScreen(
         }
     }
 
-    // Pemanggilan fungsi ketika gambar dari kamera berhasil diambil
+    // Handle camera result
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -110,10 +130,10 @@ fun HomeScreen(
         }
     }
 
-    // Mendapatkan HistoryViewModel
+    // Get HistoryViewModel
     val historyViewModel: HistoryViewModel = viewModel()
 
-    // Setup PredictionHelper ketika komponen dimulai
+    // Setup PredictionHelper when the component is launched
     LaunchedEffect(Unit) {
         predictionHelper = PredictionHelper(
             context = context,
@@ -121,22 +141,22 @@ fun HomeScreen(
                 errorMessage = null
                 Log.d("HomeScreen", "Prediction result: Kelas $predictedClass dengan confidence: $confidence")
 
-                // Mapping kelas ke nominal
+                // Mapping class to nominal
                 val nominal = getNominal(predictedClass)
 
-                // Menggunakan TTS untuk mengucapkan hasil dengan format nominal
+                // Use TTS to speak the result
                 textToSpeech.speak(
-                    "Hasil prediksi adalah. Nominal $nominal  dengan confidence ${"%.2f".format(confidence * 100)} persen.",
+                    "Hasil prediksi adalah. Nominal $nominal dengan confidence ${"%.2f".format(confidence * 100)} persen.",
                     TextToSpeech.QUEUE_FLUSH,
                     null,
                     null
                 )
 
-                // Memanggil callback untuk menavigasi ke ResultScreen
+                // Call callback to navigate to ResultScreen
                 Log.d("HomeScreen", "Memanggil onPredictionResult dengan kelas: $predictedClass dan confidence: $confidence")
                 onPredictionResult(predictedClass, confidence)
 
-                // Menambahkan history ke Firestore dan Room
+                // Add history to Firestore and Room
                 historyViewModel.addHistory(nominal, confidence)
             },
             onError = { error ->
@@ -146,68 +166,200 @@ fun HomeScreen(
         )
     }
 
+    val greetingText = getGreetingText(userData?.username ?: "Unknown User")
+
     // UI
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Halaman Beranda", color = MaterialTheme.colorScheme.onBackground)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Top Section
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                // Greeting Texts
+                Text(
+                    text = greetingText.greeting,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .semantics {
+                            contentDescription = greetingText.greeting
+                        }
+                )
 
-        Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = greetingText.username,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(bottom = 24.dp)
+                        .semantics {
+                            contentDescription = "Nama Pengguna: ${greetingText.username}"
+                        }
+                )
 
+                Spacer(
+                    modifier = Modifier
+                        .height(100.dp)
+                )
 
-        Button(
-            onClick = {
-                // Navigasi ke ListHistoryScreen
-                navController.navigate("list_history_screen")
+                // Camera Button
+                Button(
+                    onClick = {
+                        if (hasCameraPermission) {
+                            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                            cameraLauncher.launch(intent)
+                        } else {
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(200.dp)
+                        .semantics {
+                            contentDescription = "Tombol Buka Kamera"
+                        },
+                    content = {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_camera),
+                            contentDescription = "Ikon Kamera",
+                            tint = Color.White,
+                            modifier = Modifier.size(60.dp)
+                        )
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
-        ) {
-            Text(text = "Riwayat History")
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            // Bottom Section - History Card
+            Column(
+//                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Riwayat History",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .semantics {
+                            contentDescription = "Judul Riwayat History"
+                        }
+                )
 
-        // Tombol untuk membuka kamera
-        Button(
-            modifier = Modifier.clearAndSetSemantics {
-                contentDescription = "Buka Kamera"
-            },
-            onClick = {
-                if (hasCameraPermission) {
-                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    cameraLauncher.launch(intent)
-                } else {
-                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clickable {
+                            // Navigate to ListHistoryScreen when Card is clicked
+                            navController.navigate("list_history_screen")
+                        }
+                        .semantics {
+                            contentDescription = "Card Riwayat History, klik untuk melihat daftar riwayat"
+                        },
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp))
+                    ) {
+                        // Background Image
+                        Image(
+                            painter = painterResource(id = R.drawable.img_calendar),
+                            contentDescription = "Background Riwayat History",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+
+
+                        // Semi-Transparent Overlay
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.4f))
+                        )
+
+                        // Nominal Text at Center
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "10.000",
+                                style = MaterialTheme.typography.displayMedium.copy(
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                modifier = Modifier
+                                    .semantics {
+                                        contentDescription = "Nominal Riwayat: 10.000"
+                                    }
+                            )
+                        }
+                    }
                 }
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-        ) {
-            Text(text = "Buka Camera")
-        }
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Tombol untuk sign-out
-        Button(onClick = onSignOut) {
-            Text(text = "Log out")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        // Tampilkan pesan error jika ada
-        errorMessage?.let {
-            Text(text = "Error: $it", color = MaterialTheme.colorScheme.error)
+            // Show error message if any
+            errorMessage?.let {
+                Text(
+                    text = "Error: $it",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .semantics {
+                            contentDescription = "Pesan Error"
+                        }
+                )
+            }
         }
     }
 }
 
 /**
- * Fungsi untuk memetakan kelas ke nominal.
+ * Data class to hold greeting text
+ */
+data class GreetingText(val greeting: String, val username: String)
+
+/**
+ * Function to get greeting based on current time and username.
+ */
+fun getGreetingText(username: String): GreetingText {
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    val greeting = when (hour) {
+        in 5..11 -> "Selamat Pagi"
+        in 12..14 -> "Selamat Siang"
+        in 15..17 -> "Selamat Sore"
+        else -> "Selamat Malam"
+    }
+    return GreetingText(greeting = greeting, username = username)
+}
+
+/**
+ * Function to map class index to nominal value.
  */
 fun getNominal(classIndex: String): String {
     return when (classIndex.toIntOrNull()) {
@@ -223,7 +375,7 @@ fun getNominal(classIndex: String): String {
 }
 
 /**
- * Fungsi untuk mengonversi Bitmap ke ByteBuffer
+ * Function to convert Bitmap to ByteBuffer for model prediction.
  */
 fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
     val inputSize = 224
@@ -231,9 +383,9 @@ fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
     byteBuffer.order(ByteOrder.nativeOrder())
 
     val scaledBitmap = Bitmap.createScaledBitmap(bitmap, inputSize, inputSize, false)
-    for (i in 0 until inputSize) {
-        for (j in 0 until inputSize) {
-            val pixel = scaledBitmap.getPixel(i, j)
+    for (y in 0 until inputSize) {
+        for (x in 0 until inputSize) {
+            val pixel = scaledBitmap.getPixel(x, y)
             byteBuffer.putFloat(((pixel shr 16) and 0xFF) / 255.0f)  // R
             byteBuffer.putFloat(((pixel shr 8) and 0xFF) / 255.0f)   // G
             byteBuffer.putFloat((pixel and 0xFF) / 255.0f)           // B
