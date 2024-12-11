@@ -1,5 +1,6 @@
 package com.example.monev.ui.navigation
 
+
 import MyBottomBar
 import android.app.Activity.RESULT_OK
 import android.widget.Toast
@@ -13,24 +14,24 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
-import androidx.navigation.compose.*
-import androidx.navigation.navArgument
-import com.example.monev.sign_in.GoogleAuthUiClient
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.monev.sign_in.GoogleAuthUiClient
 import com.example.monev.ui.screens.about.AboutScreen
-import com.example.monev.ui.screens.auth.SignInScreen
-import com.example.monev.viewmodel.auth.SignInViewModel
 import com.example.monev.ui.screens.account.AccountScreen
 import com.example.monev.ui.screens.auth.SignInScreen
 import com.example.monev.ui.screens.chatbot.ChatbotScreen
@@ -39,12 +40,10 @@ import com.example.monev.ui.screens.home.HomeScreen
 import com.example.monev.ui.screens.result.ResultScreen
 import com.example.monev.ui.screens.setting.SettingScreen
 import com.example.monev.ui.screens.welcome.WelcomeScreen
-
-
+import com.example.monev.ui.splash.SplashScreen
 import com.example.monev.viewmodel.auth.SignInViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
-import com.example.monev.ui.splash.SplashScreen
 
 
 fun NavGraphBuilder.animatedComposable(
@@ -181,22 +180,23 @@ fun Navigation(modifier: Modifier = Modifier) {
                         coroutineScope.launch {
                             val signInIntentSender = googleAuthUiClient.signIn()
                             launcher.launch(
-                                IntentSenderRequest.Builder(signInIntentSender ?: return@launch).build()
+                                IntentSenderRequest.Builder(signInIntentSender ?: return@launch)
+                                    .build()
                             )
                         }
                     }
                 )
             }
 
-           
+
             // about us
             animatedComposable(Destinations.AboutScreen.route) {
                 AboutScreen(navController = navController)
             }
 
-             // History Screen
+            // History Screen
             animatedComposable(Destinations.HistoryScreen.route) {
-        
+
                 ListHistoryScreen(navController = navController)
             }
 
@@ -225,7 +225,10 @@ fun Navigation(modifier: Modifier = Modifier) {
                         // 'predictionResult' di sini adalah Int
                         // Ubah menjadi String sebelum melewati createRoute
                         navController.navigate(
-                            Destinations.ResultScreenArgs.createRoute(predictionResult.toString(), confidence)
+                            Destinations.ResultScreenArgs.createRoute(
+                                predictionResult.toString(),
+                                confidence
+                            )
                         )
                     }
                 )
@@ -298,7 +301,8 @@ fun Navigation(modifier: Modifier = Modifier) {
                     navArgument("confidence") { type = NavType.FloatType }
                 )
             ) { backStackEntry ->
-                val predictionResult = backStackEntry.arguments?.getString("predictionResult") ?: "Unknown"
+                val predictionResult =
+                    backStackEntry.arguments?.getString("predictionResult") ?: "Unknown"
                 val confidence = backStackEntry.arguments?.getFloat("confidence") ?: 0f
 
                 ResultScreen(
@@ -306,9 +310,10 @@ fun Navigation(modifier: Modifier = Modifier) {
                     predictionResult = predictionResult,
                     confidence = confidence
                 )
-            // Navigation.kt
-            animatedComposable("SplashScreen") {
-                SplashScreen(navController = navController)
+                // Navigation.kt
+                animatedComposable("SplashScreen") {
+                    SplashScreen(navController = navController)
+                }
             }
         }
     }

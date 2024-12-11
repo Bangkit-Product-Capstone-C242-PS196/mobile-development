@@ -157,106 +157,104 @@ fun HomeScreen(
                         .size(200.dp)
                         .semantics {
                             contentDescription = "Tombol Buka Kamera"
-                        },
-                    content = {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = "Ikon Kamera",
-                            tint = Color.White,
-                            modifier = Modifier.size(60.dp)
-                        )
-                    }
-                )
+                        }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = "Ikon Kamera",
+                        tint = Color.White,
+                        modifier = Modifier.size(60.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                 Button(
-            onClick = {
-                // Navigasi ke ListHistoryScreen
-                navController.navigate("list_history_screen")
-
-       
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Riwayat History",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier
-                        .padding(bottom = 8.dp)
-                        .semantics {
-                            contentDescription = "Judul Riwayat History"
-                        }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clickable {
-                            navController.navigate("HistoryScreen")
-                        }
-                        .semantics {
-                            contentDescription = "Card Riwayat History, klik untuk melihat daftar riwayat"
-                        },
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                Button(
+                    onClick = {
+                        navController.navigate("HistoryScreen")
+                    }
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Image(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = "Background Riwayat History",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
+                        Text(
+                            text = "Riwayat History",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                                .semantics {
+                                    contentDescription = "Judul Riwayat History"
+                                }
                         )
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.4f))
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        Box(
+                        Card(
+                            shape = RoundedCornerShape(16.dp),
                             modifier = Modifier
-                                .fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .height(180.dp)
+                                .clickable {
+                                    navController.navigate("HistoryScreen")
+                                }
+                                .semantics {
+                                    contentDescription = "Card Riwayat History, klik untuk melihat daftar riwayat"
+                                },
+                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                         ) {
-                            Text(
-                                text = "10.000",
-                                style = MaterialTheme.typography.displayMedium.copy(
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold
-                                ),
+                            Box(
                                 modifier = Modifier
-                                    .semantics {
-                                        contentDescription = "Nominal Riwayat: 10.000"
-                                    }
-                            )
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp))
+                            ) {
+                                Image(
+                                    imageVector = Icons.Filled.Person,
+                                    contentDescription = "Background Riwayat History",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Black.copy(alpha = 0.4f))
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "10.000",
+                                        style = MaterialTheme.typography.displayMedium.copy(
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        modifier = Modifier
+                                            .semantics {
+                                                contentDescription = "Nominal Riwayat: 10.000"
+                                            }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-            }
 
-            errorMessage?.let {
-                Text(
-                    text = "Error: $it",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .semantics {
-                            contentDescription = "Pesan Error"
-                        }
-                )
+                errorMessage?.let {
+                    Text(
+                        text = "Error: $it",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .semantics {
+                                contentDescription = "Pesan Error"
+                            }
+                    )
+                }
             }
         }
     }
