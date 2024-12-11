@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import android.R
 import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -47,7 +46,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.monev.data.model.History
@@ -179,6 +177,8 @@ fun ListHistoryScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.width(8.dp))
+
                 // Filter Tanggal
                 Box {
                     OutlinedButton(
@@ -231,14 +231,6 @@ fun ListHistoryScreen(
                     }
                 }
             }
-
-            // Header Teks
-            Text(
-                text = "Riwayat Scan",
-                color = colorScheme.onBackground,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
 
             // Daftar History
             LazyColumn(

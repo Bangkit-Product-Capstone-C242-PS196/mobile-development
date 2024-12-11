@@ -158,7 +158,7 @@ fun ChatbotScreen(navController: NavController) {
                         Text(
                             text = "CHATBOT",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = colorScheme.onPrimaryContainer,
+                            color = colorScheme.onSurface,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -204,7 +204,12 @@ fun ChatbotScreen(navController: NavController) {
                             isProcessing = false
 
                             // Prepare for speech input
-                            tts.speak("Mikrofon aktif. Silakan berbicara.", TextToSpeech.QUEUE_FLUSH, null, null)
+                            tts.speak(
+                                "Mikrofon aktif. Silakan berbicara.",
+                                TextToSpeech.QUEUE_FLUSH,
+                                null,
+                                null
+                            )
 
                             MainScope().launch {
                                 delay(2000)

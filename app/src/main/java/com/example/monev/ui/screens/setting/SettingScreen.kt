@@ -11,21 +11,32 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -62,29 +73,26 @@ fun SettingScreen(
         }
     }
 
+    Divider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = colorScheme.outlineVariant.copy(alpha = 0.5f)
+    )
+
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "PENGATURAN",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = colorScheme.onPrimaryContainer,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    Text(
+                        text = "PENGATURAN",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = colorScheme.onSurface
+                    )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = colorScheme.background
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = colorScheme.background,
+                    scrolledContainerColor = colorScheme.background
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 20.dp)
+                modifier = Modifier.statusBarsPadding()
             )
         }
     ) { paddingValues ->
@@ -93,52 +101,155 @@ fun SettingScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(colorScheme.background)
-                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             // Profile Header
-            ProfileHeader(userData)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = colorScheme.primaryContainer.copy(alpha = 0.5f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                ProfileHeader(userData)
+            }
 
-            // Setting Section
-            SettingSection(context, requestPermissionLauncher, navController)
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Settings Section
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "PREFERENSI",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    letterSpacing = 1.sp
+                )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = colorScheme.surface
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    SettingSection(context, requestPermissionLauncher, navController)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Account Section
-            AccountSection(onSignOut)
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "AKUN",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    letterSpacing = 1.sp
+                )
 
-
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = colorScheme.surface
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    AccountSection(onSignOut)
+                }
+            }
         }
     }
 }
 
 @Composable
-fun ProfileHeader(userData: UserData?) {
-    Row(
-        modifier = Modifier
+fun ProfileHeader(
+    userData: UserData?,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        if (userData?.profilePictureUrl != null) {
-            AsyncImage(
-                model = userData.profilePictureUrl,
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-        }
-        Column(
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .padding(start = 16.dp)
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = userData?.username ?: "Unknown User",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
+            // Profile Picture
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                if (userData?.profilePictureUrl != null) {
+                    AsyncImage(
+                        model = userData.profilePictureUrl,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                shape = CircleShape
+                            ),
+                        contentScale = ContentScale.Crop,
+                        error = ColorPainter(MaterialTheme.colorScheme.surfaceVariant)
+                    )
+                } else {
+                    // Default icon when no profile picture
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Default Profile Picture",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                            .clip(CircleShape),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
 
+            // User Information
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 16.dp)
+            ) {
+                Text(
+                    text = userData?.username ?: "Unknown User",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
 
@@ -146,113 +257,120 @@ fun ProfileHeader(userData: UserData?) {
 fun SettingSection(
     context: Context,
     requestPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
-    navController: NavController,
-
-    ) {
+    navController: NavController
+) {
     val preferenceManager = remember { PreferenceManager(context) }
     var isNotificationEnabled by remember { mutableStateOf(preferenceManager.getNotificationStatus()) }
+    val colorScheme = MaterialTheme.colorScheme
 
     fun startDailyReminderWorker() {
         val dailyReminderRequest: WorkRequest = PeriodicWorkRequestBuilder<DailyReminderWorker>(7, TimeUnit.DAYS).build()
         WorkManager.getInstance(context).enqueue(dailyReminderRequest)
     }
 
-    Text(
-        text = "Pengaturan",
-        color = Color.Gray,
-        modifier = Modifier.padding(vertical = 8.dp)
-    )
-
-    // notif
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .padding(end = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(Color.Blue, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // Notifications
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = "Nyalakan Notifikasi",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            leadingContent = {
                 Icon(
-                    Icons.Default.Notifications,
+                    imageVector = Icons.Rounded.Notifications,
                     contentDescription = "Notifikasi",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    tint = colorScheme.primary,
+                    modifier = Modifier
+                        .background(
+                            color = colorScheme.primary.copy(alpha = 0.1f),
+                            shape = CircleShape
+                        )
+                        .padding(8.dp)
+                )
+            },
+            trailingContent = {
+                Switch(
+                    checked = isNotificationEnabled,
+                    onCheckedChange = { isChecked ->
+                        isNotificationEnabled = isChecked
+                        preferenceManager.setNotificationStatus(isChecked)
+                        if (isChecked) {
+                            showNotification(context)
+                            startDailyReminderWorker()
+                        }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = colorScheme.secondary,
+                        checkedTrackColor = colorScheme.secondaryContainer,
+                        uncheckedThumbColor = colorScheme.onSurface,
+                        uncheckedTrackColor = colorScheme.surface
+                    )
                 )
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = "Nyalakan Notifikasi",
-                fontSize = 16.sp,
-                modifier = Modifier.weight(1f)
-            )
-        }
-        Switch(
-            checked = isNotificationEnabled,
-            onCheckedChange = { isChecked ->
-                isNotificationEnabled = isChecked
-                preferenceManager.setNotificationStatus(isChecked)
-                if (isChecked) {
-                    showNotification(context)
-                    startDailyReminderWorker()
-                }
+        )
+
+        Divider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = colorScheme.outlineVariant.copy(alpha = 0.5f)
+        )
+
+        // About Us
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = "Tentang Kami",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            leadingContent = {
+                Icon(
+                    imageVector = Icons.Rounded.Info,
+                    contentDescription = "Tentang Kami",
+                    tint = colorScheme.primary,
+                    modifier = Modifier
+                        .background(
+                            color = colorScheme.primary.copy(alpha = 0.1f),
+                            shape = CircleShape
+                        )
+                        .padding(8.dp)
+                )
+            },
+            modifier = Modifier.clickable {
+                navController.navigate(Destinations.AboutScreen.route)
             }
         )
     }
-
-    // about us
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .padding(end = 16.dp)
-            .clickable {
-                navController.navigate(Destinations.AboutScreen.route)
-            },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(Color.Blue, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = "Tentang Kami",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = "Tentang Kami",
-                fontSize = 16.sp,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
 }
-
 
 @Composable
 fun AccountSection(onSignOut: () -> Unit) {
-    TextButton(
-        onClick = onSignOut,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = "Log Out",
-            color = Color.Red
-        )
-    }
+    ListItem(
+        headlineContent = {
+            Text(
+                text = "Keluar",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error
+            )
+        },
+        leadingContent = {
+            Icon(
+                imageVector = Icons.Rounded.Close,
+                contentDescription = "Keluar",
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
+                        shape = CircleShape
+                    )
+                    .padding(8.dp)
+            )
+        },
+        modifier = Modifier.clickable(onClick = onSignOut)
+    )
 }
+
 
 
 fun showNotification(context: Context) {
