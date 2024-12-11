@@ -8,19 +8,13 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.monev.sign_in.GoogleAuthUiClient
 import com.example.monev.ui.screens.account.AccountScreen
@@ -94,7 +88,7 @@ fun Navigation(modifier: Modifier = Modifier) {
                 val viewModel = viewModel<SignInViewModel>()
                 val state = viewModel.state.collectAsStateWithLifecycle().value
 
-                LaunchedEffect(key1 = Unit) {
+                LaunchedEffect(Unit) {
                     if (googleAuthUiClient.getSignedInUser() != null) {
                         navController.navigate(Destinations.HomeScreen.route)
                     }
@@ -114,14 +108,16 @@ fun Navigation(modifier: Modifier = Modifier) {
                     }
                 )
 
-                LaunchedEffect(key1 = state.isSignInSuccesful) {
+                LaunchedEffect(state.isSignInSuccesful) {
                     if (state.isSignInSuccesful) {
                         Toast.makeText(
                             context,
                             "Sign In Sukses",
                             Toast.LENGTH_LONG
                         ).show()
-                        navController.navigate(Destinations.HomeScreen.route)
+                        navController.navigate(Destinations.HomeScreen.route) {
+                            popUpTo(Destinations.HomeScreen.route) { inclusive = true }
+                        }
                         viewModel.resetState()
                     }
                 }
@@ -139,7 +135,7 @@ fun Navigation(modifier: Modifier = Modifier) {
                 )
             }
 
-
+            // History Screen
             composable("list_history_screen") {
                 ListHistoryScreen(navController = navController)
             }
@@ -165,10 +161,11 @@ fun Navigation(modifier: Modifier = Modifier) {
                             }
                         }
                     },
-                    onPredictionResult = { prediction, confidence ->  // Callback dengan dua parameter
-                        // Navigasi ke ResultScreen dengan data prediksi
+                    onPredictionResult = { predictionResult, confidence ->
+                        // 'predictionResult' di sini adalah Int
+                        // Ubah menjadi String sebelum melewati createRoute
                         navController.navigate(
-                            Destinations.ResultScreen.createRoute(prediction, confidence)
+                            Destinations.ResultScreenArgs.createRoute(predictionResult.toString(), confidence)
                         )
                     }
                 )
@@ -187,9 +184,7 @@ fun Navigation(modifier: Modifier = Modifier) {
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            // Navigasi kembali ke WelcomeScreen setelah sign-out
                             navController.navigate(Destinations.WelcomeScreen.route) {
-                                // Menghapus semua rute sebelumnya dari stack
                                 popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
                             }
                         }
@@ -216,9 +211,7 @@ fun Navigation(modifier: Modifier = Modifier) {
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            // Navigasi kembali ke WelcomeScreen setelah sign-out
                             navController.navigate(Destinations.WelcomeScreen.route) {
-                                // Menghapus semua rute sebelumnya dari stack
                                 popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
                             }
                         }
@@ -226,16 +219,26 @@ fun Navigation(modifier: Modifier = Modifier) {
                 )
             }
 
-            // Result Screen
+            // Result Screen tanpa argumen (opsional)
+            composable(Destinations.ResultScreen.route) {
+                // Jika ingin ResultScreen tanpa argumen
+                ResultScreen(
+                    navController = navController,
+                    predictionResult = "Unknown",
+                    confidence = 0f
+                )
+            }
+
+            // Result Screen dengan argumen
             composable(
-                route = "ResultScreen/{predictionResult}/{confidence}",
+                route = Destinations.ResultScreenArgs.route,
                 arguments = listOf(
                     navArgument("predictionResult") { type = NavType.StringType },
                     navArgument("confidence") { type = NavType.FloatType }
                 )
             ) { backStackEntry ->
                 val predictionResult = backStackEntry.arguments?.getString("predictionResult") ?: "Unknown"
-                val confidence = backStackEntry.arguments?.getFloat("confidence") ?: 0.0f
+                val confidence = backStackEntry.arguments?.getFloat("confidence") ?: 0f
 
                 ResultScreen(
                     navController = navController,
