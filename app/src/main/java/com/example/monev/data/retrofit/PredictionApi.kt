@@ -1,5 +1,6 @@
-package com.example.monev.data.network
+package com.example.monev.data.retrofit
 
+import com.example.monev.data.response.PredictionResponse
 import com.google.gson.annotations.SerializedName
 import okhttp3.MultipartBody
 import retrofit2.Response
@@ -15,21 +16,3 @@ interface PredictionApi {
         @Part image: MultipartBody.Part
     ): Response<PredictionResponse>
 }
-
-// Data class untuk response dari API
-data class PredictionResponse(
-    val status: String,
-    val message: String,
-    val data: Data
-)
-
-data class Data(
-    val id: String,
-    val result: Result
-)
-
-data class Result(
-    @SerializedName("class") val classId: Int,
-    val confidence: Float,
-    val score: Int
-)

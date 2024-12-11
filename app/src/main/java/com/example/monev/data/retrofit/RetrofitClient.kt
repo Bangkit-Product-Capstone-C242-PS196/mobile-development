@@ -1,4 +1,4 @@
-package com.example.monev.data.network
+package com.example.monev.data.retrofit
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

@@ -2,9 +2,9 @@ package com.example.monev.data.repository
 
 import android.graphics.Bitmap
 import android.util.Log
-import com.example.monev.data.network.PredictionApi
-import com.example.monev.data.network.PredictionResponse
-import com.example.monev.data.network.RetrofitClient
+import com.example.monev.data.response.PredictionResponse
+import com.example.monev.data.retrofit.PredictionApi
+import com.example.monev.data.retrofit.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
