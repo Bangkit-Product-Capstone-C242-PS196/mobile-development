@@ -135,16 +135,6 @@ fun HomeScreen(
 
         Button(
             onClick = {
-                // Navigasi ke CreateHistoryScreen
-                navController.navigate("create_history_screen")
-            },
-            modifier = Modifier.padding(bottom = 8.dp)
-        ) {
-            Text(text = "Go to Create History")
-        }
-
-        Button(
-            onClick = {
                 // Navigasi ke ListHistoryScreen
                 navController.navigate("list_history_screen")
             }
