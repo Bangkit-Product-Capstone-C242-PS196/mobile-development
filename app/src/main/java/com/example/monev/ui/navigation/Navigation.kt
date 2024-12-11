@@ -1,5 +1,6 @@
 package com.example.monev.ui.navigation
 
+
 import MyBottomBar
 import android.app.Activity.RESULT_OK
 import android.widget.Toast
@@ -86,6 +87,7 @@ fun NavGraphBuilder.animatedComposable(
 fun Navigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
+
     val context = LocalContext.current
 
     val googleAuthUiClient = remember {
@@ -95,14 +97,20 @@ fun Navigation(modifier: Modifier = Modifier) {
         )
     }
 
+    // Rute yang membutuhkan BottomBar
     val screensWithBottomBar = listOf(
         Destinations.HomeScreen.route,
         Destinations.SettingScreen.route,
         Destinations.ChatbotScreen.route
     )
 
+    // Cek apakah pengguna sudah login
+    val isUserSignedIn = googleAuthUiClient.getSignedInUser() != null
+
+    // State untuk menyimpan rute saat ini
     val currentRoute = remember { mutableStateOf<String?>(null) }
 
+    // Update currentRoute setiap kali destinasi berubah
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             currentRoute.value = destination.route
@@ -111,6 +119,7 @@ fun Navigation(modifier: Modifier = Modifier) {
 
     Scaffold(
         bottomBar = {
+            // Tampilkan BottomBar hanya di rute tertentu
             if (currentRoute.value in screensWithBottomBar) {
                 MyBottomBar(navController = navController)
             }

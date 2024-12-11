@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,12 +26,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,9 +43,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -51,11 +55,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.monev.sign_in.UserData
+import com.example.monev.R
 
 object ImageHolder {
     var lastImage: Bitmap? = null
 }
-
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -72,19 +76,10 @@ fun HomeScreen(
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val textToSpeech = remember { TextToSpeech(context) { status ->
-        if (status == TextToSpeech.SUCCESS) {
-            Log.d("HomeScreen", "TTS Initialized Successfully")
-        } else {
-            Log.e("HomeScreen", "Failed to initialize TTS")
-        }
-    } }
-
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         hasCameraPermission = isGranted
-        Log.d("HomeScreen", "Camera Permission: $isGranted")
         if (!isGranted) {
             Toast.makeText(context, "Izin kamera ditolak.", Toast.LENGTH_SHORT).show()
         }
@@ -100,159 +95,155 @@ fun HomeScreen(
                 ImageHolder.lastImage = imageBitmap
                 navController.navigate("ResultScreen/Unknown/0.0f")
             } else {
-                Log.e("HomeScreen", "Failed to capture image: Bitmap is null")
                 errorMessage = "Gagal mengambil gambar."
             }
         } else {
-            Log.e("HomeScreen", "Image capture failed: Result code is not OK")
             errorMessage = "Pengambilan gambar dibatalkan."
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Column(
+    MaterialTheme {
+        Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Header
                 Text(
-                    text = "Halaman Beranda",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier
-                        .padding(bottom = 4.dp)
-                        .semantics {
-                            contentDescription = "Halaman Beranda"
-                        }
+                    text = "Halo, ${userData?.username ?: "Pengguna"}",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
-                Spacer(
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Camera Section
+                Box(
                     modifier = Modifier
-                        .height(100.dp)
-                )
-
-                Button(
-                    onClick = {
-                        if (hasCameraPermission) {
-                            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                            cameraLauncher.launch(intent)
-                        } else {
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .size(200.dp)
-                        .semantics {
-                            contentDescription = "Tombol Buka Kamera"
-                        }
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .shadow(8.dp, RoundedCornerShape(20.dp))
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = "Ikon Kamera",
-                        tint = Color.White,
-                        modifier = Modifier.size(60.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        navController.navigate("HistoryScreen")
-                    }
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .shadow(8.dp, RoundedCornerShape(20.dp))
+                            .clickable {
+                                if (hasCameraPermission) {
+                                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                                    cameraLauncher.launch(intent)
+                                } else {
+                                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                                }
+                            }
                     ) {
-                        Text(
-                            text = "Riwayat History",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                                .padding(bottom = 8.dp)
-                                .semantics {
-                                    contentDescription = "Judul Riwayat History"
-                                }
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Card(
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(180.dp)
-                                .clickable {
-                                    navController.navigate("HistoryScreen")
-                                }
-                                .semantics {
-                                    contentDescription = "Card Riwayat History, klik untuk melihat daftar riwayat"
-                                },
-                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(RoundedCornerShape(16.dp))
+                            Button(
+                                onClick = {
+                                    if (hasCameraPermission) {
+                                        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                                        cameraLauncher.launch(intent)
+                                    } else {
+                                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                ),
+                                shape = CircleShape,
+                                modifier = Modifier.size(100.dp)
                             ) {
-                                Image(
+                                Icon(
                                     imageVector = Icons.Filled.Person,
-                                    contentDescription = "Background Riwayat History",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
+                                    contentDescription = "Ikon Kamera",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(40.dp)
                                 )
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Black.copy(alpha = 0.4f))
-                                )
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "10.000",
-                                        style = MaterialTheme.typography.displayMedium.copy(
-                                            color = Color.White,
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        modifier = Modifier
-                                            .semantics {
-                                                contentDescription = "Nominal Riwayat: 10.000"
-                                            }
-                                    )
-                                }
                             }
                         }
                     }
                 }
 
+                // History Card
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Riwayat Scan",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clickable { navController.navigate("HistoryScreen") },
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp) // Meningkatkan elevasi
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        // Gambar latar belakang
+                        Image(
+                            painter = painterResource(id = R.drawable.welcome), // Ganti dengan gambar latar belakang yang sesuai
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+                        // Overlay gelap
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.5f)) // Meningkatkan transparansi
+                        )
+
+                        // Konten di tengah
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "10.000",
+                                    style = MaterialTheme.typography.displayMedium.copy(
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Error Message
                 errorMessage?.let {
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Error: $it",
                         color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .semantics {
-                                contentDescription = "Pesan Error"
-                            }
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
