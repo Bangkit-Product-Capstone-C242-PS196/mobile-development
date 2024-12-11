@@ -20,7 +20,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         val historyDao = AppDatabase.getDatabase(application).historyDao()
-        repository = HistoryRepository(historyDao)
+        repository = HistoryRepository.getInstance(historyDao) // Menggunakan singleton
         // Mengambil aliran data dan mengkonversinya menjadi StateFlow
         histories = repository.getAllHistories()
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
@@ -35,12 +35,80 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun addHistory(history: History) {
+    /**
+     * Menambahkan history baru dengan nominal, confidence, dan photo.
+     * @param nominal Nilai nominal yang diprediksi (misalnya, "1k", "2k", dll.)
+     * @param confidence Tingkat kepercayaan prediksi
+     * @param photo URL foto terkait history. Secara default diisi dengan "default_photo_url"
+     */
+    fun addHistory(nominal: String, confidence: Float, photo: String = "default_photo_url") {
         viewModelScope.launch {
             try {
-                repository.addHistory(history)
+                val currentUser = repository.getCurrentUser()
+                if (currentUser != null) {
+                    val date = System.currentTimeMillis().toString()
+                    val history = History(
+                        userId = currentUser.uid,
+                        nominal = nominal,
+                        confidence = confidence,
+                        date = date,
+                        photo = photo
+                    )
+                    repository.addHistory(history)
+                    Log.d("HistoryViewModel", "History added: $history")
+                } else {
+                    Log.e("HistoryViewModel", "No current user found.")
+                }
             } catch (e: Exception) {
                 Log.e("HistoryViewModel", "Error adding history: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Menambahkan history dengan objek History secara langsung.
+     * @param history Objek History yang akan ditambahkan
+     */
+    fun addHistoryDirectly(nominal: String, confidence: Float, photo: String = "default_photo_url") {
+        viewModelScope.launch {
+            try {
+                val currentUser = repository.getCurrentUser()
+                if (currentUser != null) {
+                    val date = System.currentTimeMillis().toString()
+                    val history = History(
+                        userId = currentUser.uid,
+                        nominal = nominal,
+                        confidence = confidence,
+                        date = date,
+                        photo = photo
+                    )
+                    // Tambahkan ke Room tanpa Firestore
+                    repository.historyDao.insertHistory(history)
+                    Log.d("HistoryViewModel", "History langsung ditambahkan ke Room: $history")
+                } else {
+                    Log.e("HistoryViewModel", "No current user found.")
+                }
+            } catch (e: Exception) {
+                Log.e("HistoryViewModel", "Error menambahkan history langsung ke Room: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Menghapus semua histories dari Room untuk user saat ini.
+     */
+    fun deleteAllHistories() {
+        viewModelScope.launch {
+            try {
+                val currentUser = repository.getCurrentUser()
+                if (currentUser != null) {
+                    repository.historyDao.deleteAllHistories(currentUser.uid)
+                    Log.d("HistoryViewModel", "All histories deleted from Room for user: ${currentUser.uid}")
+                } else {
+                    Log.e("HistoryViewModel", "No current user found.")
+                }
+            } catch (e: Exception) {
+                Log.e("HistoryViewModel", "Error deleting histories: ${e.message}")
             }
         }
     }

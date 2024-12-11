@@ -22,6 +22,8 @@ android {
         val properties=Properties()
         properties.load(project.rootProject.file("local.properties").inputStream())
         buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY")}\"")
+        buildConfigField("String", "BASE_URL", "\"${properties.getProperty("BASE_URL")}\"")
+
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -95,6 +97,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.4.1")
     implementation("io.coil-kt:coil-compose:2.2.2")
 
+
     // model
     implementation("com.google.android.gms:play-services-tflite-java:16.1.0")
     implementation("com.google.android.gms:play-services-tflite-gpu:16.2.0")
@@ -109,7 +112,18 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
 
+    // Retrofit
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // OkHttp Logging (opsional, untuk logging request dan response)
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
+    // Coroutine support for Retrofit
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
     //work manager
     implementation ("androidx.work:work-runtime-ktx:2.10.0")
+
 
 }
