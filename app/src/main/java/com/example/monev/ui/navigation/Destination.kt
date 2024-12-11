@@ -10,8 +10,6 @@ sealed class Destinations(val route: String) {
     data object HistoryScreen : Destinations("HistoryScreen")
     data object SplashScreen: Destinations("SplashScreen")
 
-
-
     // auth
     data object SignInScreen : Destinations("SignInScreen")
 
@@ -20,8 +18,6 @@ sealed class Destinations(val route: String) {
 
     // about
     data object AboutScreen: Destinations("AboutScreen")
-
-
 
 
     // ResultScreen dengan argumen

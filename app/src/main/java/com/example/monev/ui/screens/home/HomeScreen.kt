@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.provider.MediaStore
-import android.speech.tts.TextToSpeech
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,7 +14,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,14 +22,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -54,8 +48,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.example.monev.sign_in.UserData
 import com.example.monev.R
+import com.example.monev.sign_in.UserData
 
 object ImageHolder {
     var lastImage: Bitmap? = null
@@ -111,7 +105,7 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(30.dp)
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -123,7 +117,7 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(75.dp))
 
                 // Camera Section
                 Box(
@@ -167,12 +161,11 @@ fun HomeScreen(
                                     containerColor = MaterialTheme.colorScheme.primary
                                 ),
                                 shape = CircleShape,
-                                modifier = Modifier.size(100.dp)
+                                modifier = Modifier.size(150.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Person,
+                                Image(
+                                    painter = painterResource(id = R.drawable.ic_camera),  // ganti dengan nama gambar kamu
                                     contentDescription = "Ikon Kamera",
-                                    tint = Color.White,
                                     modifier = Modifier.size(40.dp)
                                 )
                             }
@@ -203,7 +196,7 @@ fun HomeScreen(
                     ) {
                         // Gambar latar belakang
                         Image(
-                            painter = painterResource(id = R.drawable.welcome), // Ganti dengan gambar latar belakang yang sesuai
+                            painter = painterResource(id = R.drawable.img_calender),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
@@ -218,19 +211,23 @@ fun HomeScreen(
 
                         // Konten di tengah
                         Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                            modifier = Modifier
+                                .semantics { contentDescription = "Daftar Pengeluaran anda" }
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+
                         ) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Text(
-                                    text = "10.000",
+                                    text = "",
                                     style = MaterialTheme.typography.displayMedium.copy(
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold
-                                    )
+                                    ),
+                                    modifier = Modifier.semantics { contentDescription = "Pengeluaran bulan ini adalah 10.000" }
                                 )
                             }
                         }

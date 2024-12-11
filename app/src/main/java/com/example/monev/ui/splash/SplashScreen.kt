@@ -41,7 +41,7 @@ fun SplashScreen(
     ) {
         Image(
             painter = painterResource(id = R.drawable.img_monev),
-            contentDescription = "Monev Logo",
+            contentDescription = "Monev - Money Voice Identifier",
             modifier = Modifier
                 .scale(scale.value)
                 .alpha(alpha.value)

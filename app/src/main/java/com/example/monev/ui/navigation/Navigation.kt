@@ -33,7 +33,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.monev.sign_in.GoogleAuthUiClient
 import com.example.monev.ui.screens.about.AboutScreen
-import com.example.monev.ui.screens.account.AccountScreen
 import com.example.monev.ui.screens.auth.SignInScreen
 import com.example.monev.ui.screens.chatbot.ChatbotScreen
 import com.example.monev.ui.screens.history.ListHistoryScreen
@@ -250,8 +249,14 @@ fun Navigation(modifier: Modifier = Modifier) {
                         coroutineScope.launch {
                             googleAuthUiClient.signOut()
                             Toast.makeText(context, "Signed out", Toast.LENGTH_LONG).show()
+                            // Navigate to WelcomeScreen and clear the back stack
                             navController.navigate(Destinations.WelcomeScreen.route) {
-                                popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
+                                // Menghapus semua screen di back stack, termasuk WelcomeScreen
+                                popUpTo(navController.graph.startDestinationRoute!!) {
+                                    inclusive = true
+                                }
+                                launchSingleTop =
+                                    true  // Jangan duplikasi WelcomeScreen jika sudah ada
                             }
                         }
                     }
@@ -273,22 +278,22 @@ fun Navigation(modifier: Modifier = Modifier) {
                 ListHistoryScreen(navController = navController)
             }
 
-            // Account Screen
-            animatedComposable(Destinations.AccountScreen.route) {
-                AccountScreen(
-                    navController = navController,
-                    userData = googleAuthUiClient.getSignedInUser(),
-                    onSignOut = {
-                        coroutineScope.launch {
-                            googleAuthUiClient.signOut()
-                            Toast.makeText(context, "Signed out", Toast.LENGTH_LONG).show()
-                            navController.navigate(Destinations.WelcomeScreen.route) {
-                                popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
-                            }
-                        }
-                    }
-                )
-            }
+//            // Account Screen
+//            animatedComposable(Destinations.AccountScreen.route) {
+//                AccountScreen(
+//                    navController = navController,
+//                    userData = googleAuthUiClient.getSignedInUser(),
+//                    onSignOut = {
+//                        coroutineScope.launch {
+//                            googleAuthUiClient.signOut()
+//                            Toast.makeText(context, "Signed out", Toast.LENGTH_LONG).show()
+//                            navController.navigate(Destinations.WelcomeScreen.route) {
+//                                popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
+//                            }
+//                        }
+//                    }
+//                )
+//            }
 
             // Result Screen dengan argumen
             composable(

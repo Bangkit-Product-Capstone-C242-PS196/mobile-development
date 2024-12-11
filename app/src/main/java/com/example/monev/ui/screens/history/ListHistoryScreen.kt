@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import android.R
-import android.icu.text.SimpleDateFormat
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -71,15 +68,15 @@ fun ListHistoryScreen(
 
     // State untuk dropdown menu
     var expandedMonth by remember { mutableStateOf(false) }
-    var selectedMonth by remember { mutableStateOf("All") }
+    var selectedMonth by remember { mutableStateOf("Semua") }
 
     // State untuk dropdown tanggal
     var expandedDate by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf("All") }
+    var selectedDate by remember { mutableStateOf("Semua") }
 
     // Daftar bulan
     val months = listOf(
-        "All", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Semua", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
         "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     )
 
@@ -91,14 +88,14 @@ fun ListHistoryScreen(
         val timestamp = history.date.toLongOrNull() ?: 0L
         val calendar = Calendar.getInstance().apply { timeInMillis = timestamp }
 
-        val matchMonth = if (selectedMonth == "All") {
+        val matchMonth = if (selectedMonth == "Semua") {
             true
         } else {
             val monthNumber = getMonthNumber(selectedMonth)
             calendar.get(Calendar.MONTH) + 1 == monthNumber
         }
 
-        val matchDate = if (selectedDate == "All") {
+        val matchDate = if (selectedDate == "Semua") {
             true
         } else {
             calendar.get(Calendar.DAY_OF_MONTH).toString() == selectedDate
@@ -223,8 +220,8 @@ fun ListHistoryScreen(
                         horizontalArrangement = Arrangement.End
                     ) {
                         TextButton(onClick = {
-                            selectedMonth = "All"
-                            selectedDate = "All"
+                            selectedMonth = "Semua"
+                            selectedDate = "Semua"
                         }) {
                             Text("Reset Filter")
                         }

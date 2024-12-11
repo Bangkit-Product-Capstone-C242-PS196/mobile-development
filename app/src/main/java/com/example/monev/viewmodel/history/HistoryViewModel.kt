@@ -65,53 +65,6 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Menambahkan history dengan objek History secara langsung.
-     * @param history Objek History yang akan ditambahkan
-     */
-    fun addHistoryDirectly(nominal: String, confidence: Float, photo: String = "default_photo_url") {
-        viewModelScope.launch {
-            try {
-                val currentUser = repository.getCurrentUser()
-                if (currentUser != null) {
-                    val date = System.currentTimeMillis().toString()
-                    val history = History(
-                        userId = currentUser.uid,
-                        nominal = nominal,
-                        confidence = confidence,
-                        date = date,
-                        photo = photo
-                    )
-                    // Tambahkan ke Room tanpa Firestore
-                    repository.historyDao.insertHistory(history)
-                    Log.d("HistoryViewModel", "History langsung ditambahkan ke Room: $history")
-                } else {
-                    Log.e("HistoryViewModel", "No current user found.")
-                }
-            } catch (e: Exception) {
-                Log.e("HistoryViewModel", "Error menambahkan history langsung ke Room: ${e.message}")
-            }
-        }
-    }
-
-    /**
-     * Menghapus semua histories dari Room untuk user saat ini.
-     */
-    fun deleteAllHistories() {
-        viewModelScope.launch {
-            try {
-                val currentUser = repository.getCurrentUser()
-                if (currentUser != null) {
-                    repository.historyDao.deleteAllHistories(currentUser.uid)
-                    Log.d("HistoryViewModel", "All histories deleted from Room for user: ${currentUser.uid}")
-                } else {
-                    Log.e("HistoryViewModel", "No current user found.")
-                }
-            } catch (e: Exception) {
-                Log.e("HistoryViewModel", "Error deleting histories: ${e.message}")
-            }
-        }
-    }
 
     override fun onCleared() {
         super.onCleared()

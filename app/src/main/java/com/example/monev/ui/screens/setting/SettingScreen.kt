@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -74,7 +77,6 @@ fun SettingScreen(
                         Text(
                             text = "PENGATURAN",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = colorScheme.onPrimaryContainer,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -149,6 +151,8 @@ fun SettingSection(
     navController: NavController,
 
     ) {
+    val colorScheme = colorScheme
+
     val preferenceManager = remember { PreferenceManager(context) }
     var isNotificationEnabled by remember { mutableStateOf(preferenceManager.getNotificationStatus()) }
 
@@ -159,7 +163,7 @@ fun SettingSection(
 
     Text(
         text = "Pengaturan",
-        color = Color.Gray,
+//        color = Color.Gray,
         modifier = Modifier.padding(vertical = 8.dp)
     )
 
@@ -201,8 +205,16 @@ fun SettingSection(
                     showNotification(context)
                     startDailyReminderWorker()
                 }
+            },
+            modifier = Modifier.semantics {
+                contentDescription = if (isNotificationEnabled) {
+                    "Notifikasi aktif"
+                } else {
+                    "Notifikasi mati"
+                }
             }
         )
+
     }
 
     // about us
