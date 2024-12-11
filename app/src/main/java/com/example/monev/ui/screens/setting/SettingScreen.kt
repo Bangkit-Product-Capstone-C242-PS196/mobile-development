@@ -72,7 +72,7 @@ fun SettingScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "SETTING",
+                            text = "PENGATURAN",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = colorScheme.onPrimaryContainer,
                             textAlign = TextAlign.Center
@@ -93,7 +93,7 @@ fun SettingScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(colorScheme.background)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
             // Profile Header
             ProfileHeader(userData)
@@ -148,7 +148,7 @@ fun SettingSection(
     requestPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
     navController: NavController,
 
-) {
+    ) {
     val preferenceManager = remember { PreferenceManager(context) }
     var isNotificationEnabled by remember { mutableStateOf(preferenceManager.getNotificationStatus()) }
 
