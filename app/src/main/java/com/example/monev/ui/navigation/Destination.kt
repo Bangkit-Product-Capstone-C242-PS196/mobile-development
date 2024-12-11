@@ -7,9 +7,9 @@ sealed class Destinations(val route: String) {
     data object AccountScreen : Destinations("AccountScreen")
     data object SettingScreen : Destinations("SettingScreen")
     data object ChatbotScreen : Destinations("ChatbotScreen")
+    data object HistoryScreen : Destinations("HistoryScreen")
 
     // auth
-    data object ProfileScreen : Destinations("ProfileScreen")
     data object SignInScreen : Destinations("SignInScreen")
 
     // ResultScreen tanpa argumen

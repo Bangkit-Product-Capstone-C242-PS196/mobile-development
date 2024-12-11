@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.monev.data.model.History
 
 
-@Database(entities = [History::class], version = 2, exportSchema = false)
+@Database(entities = [History::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun historyDao(): HistoryDao
 

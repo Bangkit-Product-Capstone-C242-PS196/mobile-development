@@ -136,7 +136,7 @@ fun Navigation(modifier: Modifier = Modifier) {
             }
 
             // History Screen
-            composable("list_history_screen") {
+            composable(Destinations.HistoryScreen.route) {
                 ListHistoryScreen(navController = navController)
             }
 

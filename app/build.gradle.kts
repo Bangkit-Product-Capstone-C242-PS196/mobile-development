@@ -24,6 +24,7 @@ android {
         buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY")}\"")
         buildConfigField("String", "BASE_URL", "\"${properties.getProperty("BASE_URL")}\"")
 
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -86,7 +87,7 @@ dependencies {
     implementation(libs.androidx.camera.extensions)
     implementation(libs.generativeai)
     implementation(libs.okhttp)
-//    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.material.icons.extended)
 
     // firestore
     implementation(libs.firebase.firestore)
@@ -116,7 +117,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
 
     // OkHttp Logging (opsional, untuk logging request dan response)
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
 
     // Coroutine support for Retrofit
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")

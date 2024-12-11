@@ -270,8 +270,8 @@ fun ResultScreen(
 
                     Button(
                         onClick = {
-                            navController.navigate("home_screen") {
-                                popUpTo("home_screen") { inclusive = true }
+                            navController.navigate("HomeScreen") {
+                                popUpTo("HomeScreen") { inclusive = true }
                             }
                         },
                         modifier = Modifier
