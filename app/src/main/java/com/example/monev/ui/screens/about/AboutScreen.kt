@@ -54,7 +54,7 @@ fun AboutScreen(
         TeamMemberData(
             name = "Mochamad Rizki Rachman",
             linkedin = "https://www.linkedin.com/in/rizqi-rahcman/?lipi=urn%3Ali%3Apage%3Ad_flagship3_people_connections%3BS1dQdw4ORDWNprd4cnwhUQ%3D%3D",
-            path = "Mobile Development",
+            path = "Machine Learning",
             image = R.drawable.rahman
         ),
         TeamMemberData(
@@ -67,19 +67,19 @@ fun AboutScreen(
             name = "Zamachsyafi Shidqi Athallah",
             linkedin = "https://www.linkedin.com/in/zamachsyafi-shidqi-athallah/?lipi=urn%3Ali%3Apage%3Ad_flagship3_people_connections%3BS1dQdw4ORDWNprd4cnwhUQ%3D%3D",
             path = "Machine Learning",
-            image = R.drawable.dika
+            image = R.drawable.sidqi
         ),
         TeamMemberData(
             name = "Fauzan Dwi Eryawan",
             linkedin = "https://www.linkedin.com/in/fauzan-dwi-eryawan-43a095250/?lipi=urn%3Ali%3Apage%3Ad_flagship3_people_connections%3BS1dQdw4ORDWNprd4cnwhUQ%3D%3D",
             path = "Cloud Computing",
-            image = R.drawable.dika
+            image = R.drawable.fauzan
         ),
         TeamMemberData(
             name = "Raihan Muhammad Rizki Rahman",
             linkedin = "https://www.linkedin.com/in/raihanmuhammadrr/?lipi=urn%3Ali%3Apage%3Ad_flagship3_people_connections%3BS1dQdw4ORDWNprd4cnwhUQ%3D%3D",
             path = "Cloud Computing",
-            image = R.drawable.dika
+            image = R.drawable.raihan
         ),
         TeamMemberData(
             name = "Adika Akbar Kurniawan",
@@ -125,7 +125,7 @@ fun AboutScreen(
 
         // Deskripsi
         Text(
-            text = "Aplikasi yang bertujuan untuk tunanetra dalam melakukan scan nilai mata uang melalui kamera, yang nanti akan memberikan suara untuk nominal mata uang yang discan, sehingga memudahkan dalam jual beli dan memvalidasi nilai mata uang para tunanetra.",
+            text = "Sebuah aplikasi inovatif yang dirancang khusus untuk membantu tunanetra dalam mengenali nilai mata uang. Aplikasi ini menggunakan kamera untuk memindai nominal uang, lalu memberikan informasi nilai mata uang melalui suara. Dengan fitur ini, aplikasi dapat mempermudah proses jual beli, belanja, pembayaran, dan aktivitas finansial lainnya, serta membantu memvalidasi nilai uang secara mandiri bagi tunanetra, memberikan solusi praktis dan inklusif dalam kehidupan sehari-hari.",
             fontWeight = FontWeight.Normal,
             fontSize = 16.sp,
         )
