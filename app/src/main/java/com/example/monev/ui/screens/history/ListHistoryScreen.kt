@@ -110,7 +110,7 @@ fun ListHistoryScreen(
     Scaffold(
         topBar = {
             SmallTopAppBar(
-                title = { Text("Riwayat Scan", color = colorScheme.scrim) },
+                title = { Text("Riwayat Scan", color = colorScheme.onPrimary) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(

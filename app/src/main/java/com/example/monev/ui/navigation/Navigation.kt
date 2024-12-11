@@ -123,7 +123,7 @@ fun Navigation(modifier: Modifier = Modifier) {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = if (isUserSignedIn) Destinations.HomeScreen.route else Destinations.SplashScreen.route,
+            startDestination = if (isUserSignedIn) Destinations.HomeScreen.route else Destinations.WelcomeScreen.route,
             modifier = Modifier.padding(paddingValues)
         ) {
             // WelcomeScreen (tanpa BottomBar)
