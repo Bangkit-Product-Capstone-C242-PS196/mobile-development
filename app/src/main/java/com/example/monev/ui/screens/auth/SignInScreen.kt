@@ -123,7 +123,7 @@ fun SignInScreen(
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color(0xFF33B5E5)
+                        color = colorScheme.primary
                     )
                 )
             }

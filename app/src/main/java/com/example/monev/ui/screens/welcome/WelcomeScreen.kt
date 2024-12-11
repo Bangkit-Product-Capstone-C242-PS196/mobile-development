@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,19 +15,17 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.monev.R
 
 @Composable
 fun WelcomeScreen(
     onNextClick: () -> Unit
 ) {
-    val colorScheme = MaterialTheme.colorScheme
+    val colorScheme = colorScheme
     Box(
 
         modifier = Modifier
@@ -75,10 +74,10 @@ fun WelcomeScreen(
             }
 
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                painter = painterResource(id = R.drawable.welcome),
                 contentDescription = "Welcome Character",
                 modifier = Modifier
-                    .size(200.dp)
+                    .size(450.dp)
                     .padding(vertical = 32.dp)
             )
 
@@ -101,7 +100,7 @@ fun WelcomeScreen(
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color(0xFF33B5E5)
+                        color = colorScheme.primary
                     )
                 )
             }

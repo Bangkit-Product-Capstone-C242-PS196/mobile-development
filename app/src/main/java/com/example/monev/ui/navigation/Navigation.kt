@@ -6,6 +6,11 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -17,6 +22,15 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.monev.sign_in.GoogleAuthUiClient
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.monev.sign_in.GoogleAuthUiClient
+import com.example.monev.ui.screens.about.AboutScreen
+import com.example.monev.ui.screens.auth.SignInScreen
+import com.example.monev.viewmodel.auth.SignInViewModel
 import com.example.monev.ui.screens.account.AccountScreen
 import com.example.monev.ui.screens.auth.SignInScreen
 import com.example.monev.ui.screens.chatbot.ChatbotScreen
@@ -25,9 +39,48 @@ import com.example.monev.ui.screens.home.HomeScreen
 import com.example.monev.ui.screens.result.ResultScreen
 import com.example.monev.ui.screens.setting.SettingScreen
 import com.example.monev.ui.screens.welcome.WelcomeScreen
+
+
 import com.example.monev.viewmodel.auth.SignInViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
+import com.example.monev.ui.splash.SplashScreen
+
+
+fun NavGraphBuilder.animatedComposable(
+    route: String,
+    content: @Composable (NavBackStackEntry) -> Unit
+) {
+    composable(
+        route = route,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                animationSpec = tween(300, easing = EaseOut)
+            ) + fadeIn(animationSpec = tween(300))
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                animationSpec = tween(300, easing = EaseOut)
+            ) + fadeOut(animationSpec = tween(300))
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                animationSpec = tween(300, easing = EaseOut)
+            ) + fadeIn(animationSpec = tween(300))
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                animationSpec = tween(300, easing = EaseOut)
+            ) + fadeOut(animationSpec = tween(300))
+        }
+    ) { navBackStackEntry ->
+        content(navBackStackEntry)
+    }
+}
 
 @Composable
 fun Navigation(modifier: Modifier = Modifier) {
@@ -71,11 +124,11 @@ fun Navigation(modifier: Modifier = Modifier) {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = if (isUserSignedIn) Destinations.HomeScreen.route else Destinations.WelcomeScreen.route,
+            startDestination = if (isUserSignedIn) Destinations.HomeScreen.route else Destinations.SplashScreen.route,
             modifier = Modifier.padding(paddingValues)
         ) {
             // WelcomeScreen (tanpa BottomBar)
-            composable(Destinations.WelcomeScreen.route) {
+            animatedComposable(Destinations.WelcomeScreen.route) {
                 WelcomeScreen(onNextClick = {
                     navController.navigate(Destinations.SignInScreen.route) {
                         popUpTo(Destinations.SignInScreen.route) { inclusive = true }
@@ -84,7 +137,7 @@ fun Navigation(modifier: Modifier = Modifier) {
             }
 
             // SignIn Screen
-            composable(Destinations.SignInScreen.route) {
+            animatedComposable(Destinations.SignInScreen.route) {
                 val viewModel = viewModel<SignInViewModel>()
                 val state = viewModel.state.collectAsStateWithLifecycle().value
 
@@ -112,7 +165,7 @@ fun Navigation(modifier: Modifier = Modifier) {
                     if (state.isSignInSuccesful) {
                         Toast.makeText(
                             context,
-                            "Sign In Sukses",
+                            "Sign In Success",
                             Toast.LENGTH_LONG
                         ).show()
                         navController.navigate(Destinations.HomeScreen.route) {
@@ -135,8 +188,15 @@ fun Navigation(modifier: Modifier = Modifier) {
                 )
             }
 
-            // History Screen
-            composable(Destinations.HistoryScreen.route) {
+           
+            // about us
+            animatedComposable(Destinations.AboutScreen.route) {
+                AboutScreen(navController = navController)
+            }
+
+             // History Screen
+            animatedComposable(Destinations.HistoryScreen.route) {
+        
                 ListHistoryScreen(navController = navController)
             }
 
@@ -175,6 +235,7 @@ fun Navigation(modifier: Modifier = Modifier) {
             composable(Destinations.SettingScreen.route) {
                 SettingScreen(
                     navController = navController,
+                    userData = googleAuthUiClient.getSignedInUser(), // Pass the userData here
                     onSignOut = {
                         coroutineScope.launch {
                             googleAuthUiClient.signOut()
@@ -245,6 +306,9 @@ fun Navigation(modifier: Modifier = Modifier) {
                     predictionResult = predictionResult,
                     confidence = confidence
                 )
+            // Navigation.kt
+            animatedComposable("SplashScreen") {
+                SplashScreen(navController = navController)
             }
         }
     }

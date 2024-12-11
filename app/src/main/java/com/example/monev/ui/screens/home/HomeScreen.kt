@@ -169,6 +169,13 @@ fun HomeScreen(
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
+
+                 Button(
+            onClick = {
+                // Navigasi ke ListHistoryScreen
+                navController.navigate("list_history_screen")
+
+       
             }
 
             Column(
