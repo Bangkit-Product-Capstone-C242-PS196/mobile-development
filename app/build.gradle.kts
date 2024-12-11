@@ -87,7 +87,7 @@ dependencies {
     implementation(libs.androidx.camera.extensions)
     implementation(libs.generativeai)
     implementation(libs.okhttp)
-    implementation(libs.androidx.material.icons.extended)
+//    implementation(libs.androidx.material.icons.extended)
 
     // firestore
     implementation(libs.firebase.firestore)
