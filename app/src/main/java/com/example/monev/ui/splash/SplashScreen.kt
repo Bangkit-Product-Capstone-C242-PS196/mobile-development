@@ -17,20 +17,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
-import kotlinx.coroutines.launch
-import androidx.navigation.NavController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.example.monev.R
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
-fun SplashScreen(navController: NavController) {
+fun SplashScreen(
+    onSplashComplete: () -> Unit
+) {
     val scale = remember { Animatable(0.5f) }
     val alpha = remember { Animatable(0f) }
-
     val coroutineScope = rememberCoroutineScope()
 
     Box(
@@ -71,8 +71,7 @@ fun SplashScreen(navController: NavController) {
         }
 
         delay(2000)
-        navController.navigate("WelcomeScreen") {
-            popUpTo("SplashScreen") { inclusive = true }
-        }
+        // Setelah animasi splash selesai, panggil callback
+        onSplashComplete()
     }
 }

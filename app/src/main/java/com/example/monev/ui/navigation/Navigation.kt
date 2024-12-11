@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -45,7 +46,7 @@ import com.example.monev.viewmodel.auth.SignInViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
-
+@OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.animatedComposable(
     route: String,
     content: @Composable (NavBackStackEntry) -> Unit
@@ -81,6 +82,7 @@ fun NavGraphBuilder.animatedComposable(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
@@ -88,16 +90,18 @@ fun Navigation(modifier: Modifier = Modifier) {
 
     val context = LocalContext.current
 
-    val googleAuthUiClient = GoogleAuthUiClient(
-        context = LocalContext.current.applicationContext,
-        oneTapClient = Identity.getSignInClient(LocalContext.current.applicationContext)
-    )
+    val googleAuthUiClient = remember {
+        GoogleAuthUiClient(
+            context = context.applicationContext,
+            oneTapClient = Identity.getSignInClient(context.applicationContext)
+        )
+    }
 
     // Rute yang membutuhkan BottomBar
     val screensWithBottomBar = listOf(
         Destinations.HomeScreen.route,
         Destinations.SettingScreen.route,
-        Destinations.ChatbotScreen.route,
+        Destinations.ChatbotScreen.route
     )
 
     // Cek apakah pengguna sudah login
@@ -123,16 +127,37 @@ fun Navigation(modifier: Modifier = Modifier) {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = if (isUserSignedIn) Destinations.HomeScreen.route else Destinations.WelcomeScreen.route,
-            modifier = Modifier.padding(paddingValues)
+            startDestination = Destinations.SplashScreen.route,
+            modifier = Modifier
+                .padding(paddingValues)
         ) {
+            // SplashScreen: Tentukan rute setelah splash berdasarkan login
+            animatedComposable(Destinations.SplashScreen.route) { splashBackStackEntry ->
+                SplashScreen(
+                    onSplashComplete = {
+                        val isUserSignedIn = googleAuthUiClient.getSignedInUser() != null
+                        if (isUserSignedIn) {
+                            navController.navigate(Destinations.HomeScreen.route) {
+                                popUpTo(Destinations.SplashScreen.route) { inclusive = true }
+                            }
+                        } else {
+                            navController.navigate(Destinations.WelcomeScreen.route) {
+                                popUpTo(Destinations.SplashScreen.route) { inclusive = true }
+                            }
+                        }
+                    }
+                )
+            }
+
             // WelcomeScreen (tanpa BottomBar)
             animatedComposable(Destinations.WelcomeScreen.route) {
-                WelcomeScreen(onNextClick = {
-                    navController.navigate(Destinations.SignInScreen.route) {
-                        popUpTo(Destinations.SignInScreen.route) { inclusive = true }
+                WelcomeScreen(
+                    onNextClick = {
+                        navController.navigate(Destinations.SignInScreen.route) {
+                            popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
+                        }
                     }
-                })
+                )
             }
 
             // SignIn Screen
@@ -142,7 +167,9 @@ fun Navigation(modifier: Modifier = Modifier) {
 
                 LaunchedEffect(Unit) {
                     if (googleAuthUiClient.getSignedInUser() != null) {
-                        navController.navigate(Destinations.HomeScreen.route)
+                        navController.navigate(Destinations.HomeScreen.route) {
+                            popUpTo(Destinations.SignInScreen.route) { inclusive = true }
+                        }
                     }
                 }
 
@@ -156,19 +183,17 @@ fun Navigation(modifier: Modifier = Modifier) {
                                 )
                                 viewModel.onSignInResult(signInResult)
                             }
+                        } else {
+                            Toast.makeText(context, "Sign In Canceled", Toast.LENGTH_SHORT).show()
                         }
                     }
                 )
 
                 LaunchedEffect(state.isSignInSuccesful) {
                     if (state.isSignInSuccesful) {
-                        Toast.makeText(
-                            context,
-                            "Sign In Success",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        Toast.makeText(context, "Sign In Success", Toast.LENGTH_LONG).show()
                         navController.navigate(Destinations.HomeScreen.route) {
-                            popUpTo(Destinations.HomeScreen.route) { inclusive = true }
+                            popUpTo(Destinations.SignInScreen.route) { inclusive = true }
                         }
                         viewModel.resetState()
                     }
@@ -179,54 +204,36 @@ fun Navigation(modifier: Modifier = Modifier) {
                     onSignInClick = {
                         coroutineScope.launch {
                             val signInIntentSender = googleAuthUiClient.signIn()
-                            launcher.launch(
-                                IntentSenderRequest.Builder(signInIntentSender ?: return@launch)
-                                    .build()
-                            )
+                            if (signInIntentSender != null) {
+                                launcher.launch(
+                                    IntentSenderRequest.Builder(signInIntentSender).build()
+                                )
+                            } else {
+                                Toast.makeText(context, "Sign In Failed", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 )
             }
 
-
-            // about us
-            animatedComposable(Destinations.AboutScreen.route) {
-                AboutScreen(navController = navController)
-            }
-
-            // History Screen
-            animatedComposable(Destinations.HistoryScreen.route) {
-
-                ListHistoryScreen(navController = navController)
-            }
-
             // HomeScreen (dengan BottomBar)
-            composable(Destinations.HomeScreen.route) {
+            animatedComposable(Destinations.HomeScreen.route) {
                 HomeScreen(
                     navController = navController,
                     userData = googleAuthUiClient.getSignedInUser(),
                     onSignOut = {
                         coroutineScope.launch {
                             googleAuthUiClient.signOut()
-                            Toast.makeText(
-                                context,
-                                "signed out",
-                                Toast.LENGTH_LONG
-                            ).show()
-
-                            // Navigasi kembali ke WelcomeScreen setelah sign-out
+                            Toast.makeText(context, "Signed out", Toast.LENGTH_LONG).show()
                             navController.navigate(Destinations.WelcomeScreen.route) {
-                                // Menghapus semua rute sebelumnya dari stack
                                 popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
                             }
                         }
                     },
                     onPredictionResult = { predictionResult, confidence ->
-                        // 'predictionResult' di sini adalah Int
-                        // Ubah menjadi String sebelum melewati createRoute
                         navController.navigate(
                             Destinations.ResultScreenArgs.createRoute(
-                                predictionResult.toString(),
+                                predictionResult,
                                 confidence
                             )
                         )
@@ -235,19 +242,14 @@ fun Navigation(modifier: Modifier = Modifier) {
             }
 
             // SettingScreen (dengan BottomBar)
-            composable(Destinations.SettingScreen.route) {
+            animatedComposable(Destinations.SettingScreen.route) {
                 SettingScreen(
                     navController = navController,
-                    userData = googleAuthUiClient.getSignedInUser(), // Pass the userData here
+                    userData = googleAuthUiClient.getSignedInUser(),
                     onSignOut = {
                         coroutineScope.launch {
                             googleAuthUiClient.signOut()
-                            Toast.makeText(
-                                context,
-                                "signed out",
-                                Toast.LENGTH_LONG
-                            ).show()
-
+                            Toast.makeText(context, "Signed out", Toast.LENGTH_LONG).show()
                             navController.navigate(Destinations.WelcomeScreen.route) {
                                 popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
                             }
@@ -256,40 +258,35 @@ fun Navigation(modifier: Modifier = Modifier) {
                 )
             }
 
-            // Chatbot Screen
-            composable(Destinations.ChatbotScreen.route) {
+            // Chatbot Screen (dengan BottomBar)
+            animatedComposable(Destinations.ChatbotScreen.route) {
                 ChatbotScreen(navController = navController)
             }
 
+            // About Screen
+            animatedComposable(Destinations.AboutScreen.route) {
+                AboutScreen(navController = navController)
+            }
+
+            // History Screen (dengan BottomBar)
+            animatedComposable(Destinations.HistoryScreen.route) {
+                ListHistoryScreen(navController = navController)
+            }
+
             // Account Screen
-            composable(Destinations.AccountScreen.route) {
+            animatedComposable(Destinations.AccountScreen.route) {
                 AccountScreen(
                     navController = navController,
                     userData = googleAuthUiClient.getSignedInUser(),
                     onSignOut = {
                         coroutineScope.launch {
                             googleAuthUiClient.signOut()
-                            Toast.makeText(
-                                context,
-                                "signed out",
-                                Toast.LENGTH_LONG
-                            ).show()
-
+                            Toast.makeText(context, "Signed out", Toast.LENGTH_LONG).show()
                             navController.navigate(Destinations.WelcomeScreen.route) {
                                 popUpTo(Destinations.WelcomeScreen.route) { inclusive = true }
                             }
                         }
                     }
-                )
-            }
-
-            // Result Screen tanpa argumen (opsional)
-            composable(Destinations.ResultScreen.route) {
-                // Jika ingin ResultScreen tanpa argumen
-                ResultScreen(
-                    navController = navController,
-                    predictionResult = "Unknown",
-                    confidence = 0f
                 )
             }
 
@@ -310,10 +307,15 @@ fun Navigation(modifier: Modifier = Modifier) {
                     predictionResult = predictionResult,
                     confidence = confidence
                 )
-                // Navigation.kt
-                animatedComposable("SplashScreen") {
-                    SplashScreen(navController = navController)
-                }
+            }
+
+            // Opsional: Jika ingin ResultScreen tanpa argumen
+            animatedComposable(Destinations.ResultScreen.route) {
+                ResultScreen(
+                    navController = navController,
+                    predictionResult = "Unknown",
+                    confidence = 0f
+                )
             }
         }
     }
