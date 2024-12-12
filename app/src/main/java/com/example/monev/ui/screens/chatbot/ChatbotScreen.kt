@@ -130,8 +130,7 @@ fun ChatbotScreen(navController: NavController) {
                 isProcessing = true
 
                 val userInput = matches[0]
-                val prompt = "Kau adalah seorang developer aplikasi monev. Aplikasi yang bertujuan untuk tunanetra dalam melakukan scan nilai mata uang melalui kamera. Untuk mulai fitur scan, akses kamera bisa dari tombol di tengah layar. untuk akses daftar history juga berada di beranda bagian bawah. Client bertanya: \"$userInput\""
-
+                val prompt = "Kau adalah seorang developer aplikasi monev. kalau user tanya mengenai monev, Aplikasi monev(singkatan dari money voice identifier) Sebuah aplikasi inovatif yang dirancang khusus untuk membantu tunanetra dalam mengenali nilai mata uang. Aplikasi ini menggunakan kamera untuk memindai nominal uang, lalu memberikan informasi nilai mata uang melalui suara. Untuk mulai fitur scan, akses kamera bisa dari tombol di tengah layar. untuk akses daftar history juga berada di beranda bagian bawah. Client bertanya: \"$userInput\""
                 MainScope().launch {
                     try {
                         val aiResponse: GenerateContentResponse = generativeModel.generateContent(prompt)
