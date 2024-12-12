@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +51,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import coil.compose.AsyncImage
+import com.example.monev.R
 import com.example.monev.sign_in.UserData
 import com.example.monev.ui.navigation.Destinations
 import com.example.monev.utils.PreferenceManager
@@ -365,7 +367,7 @@ fun AccountSection(onSignOut: () -> Unit) {
         },
         leadingContent = {
             Icon(
-                imageVector = Icons.Rounded.Close,
+                painter = painterResource(id = R.drawable.ic_logout),
                 contentDescription = "Keluar",
                 tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier
