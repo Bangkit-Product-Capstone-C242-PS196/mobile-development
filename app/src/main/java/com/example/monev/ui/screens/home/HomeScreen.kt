@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.provider.MediaStore
-import android.speech.tts.TextToSpeech
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,10 +31,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -52,7 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -66,8 +60,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.monev.sign_in.UserData
 import com.example.monev.R
+import com.example.monev.sign_in.UserData
 
 object ImageHolder {
     var lastImage: Bitmap? = null
@@ -87,6 +81,8 @@ fun HomeScreen(
         )
     }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+
 
     // Animation states
     val headerAlpha by animateFloatAsState(targetValue = 1f, animationSpec = tween(1000))
@@ -229,19 +225,23 @@ private fun CameraSection(
         ) {
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(100.dp)
+                    .semantics {
+                        contentDescription = "Klik disini untuk mulai scan"
+                    }
                     .background(
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                         CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Filled.AddCircle,
-                    contentDescription = "Camera",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(36.dp)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_camera),
+                    contentDescription = "Scan",
+                    modifier = Modifier
+                        .size(36.dp)
                 )
+
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -265,6 +265,8 @@ private fun HistorySection(
     onHistoryClick: () -> Unit,
     contentScale: Float
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     Column {
         Text(
             text = "Riwayat Scan",
@@ -290,7 +292,7 @@ private fun HistorySection(
             ) {
                 // Background image with scrim
                 AsyncImage(
-                    model = R.drawable.welcome,
+                    model = R.drawable.img_calender,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -298,6 +300,8 @@ private fun HistorySection(
 
                 Box(
                     modifier = Modifier
+
+                        .semantics { contentDescription = "Daftar Pengeluaran anda" }
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
@@ -306,7 +310,8 @@ private fun HistorySection(
                                     Color.Black.copy(alpha = 0.7f)
                                 )
                             )
-                        )
+                        ),
+
                 )
 
                 // Content
@@ -318,18 +323,10 @@ private fun HistorySection(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "10.000",
-                        style = MaterialTheme.typography.displayMedium.copy(
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-
-                    Text(
-                        text = "Total Scan",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
+                        text = "History anda",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primaryContainer
                     )
                 }
             }

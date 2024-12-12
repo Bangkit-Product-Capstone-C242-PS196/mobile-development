@@ -106,7 +106,7 @@ fun AboutScreen(
     ) {
         // Gambar utama tanpa ruang terpisah
         Image(
-            painter = painterResource(id = R.drawable.img_monev),
+            painter = painterResource(id = R.drawable.img_monev_nobg),
             contentDescription = "Logo",
             contentScale = ContentScale.Crop,
             modifier = Modifier

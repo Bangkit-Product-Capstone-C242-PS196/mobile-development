@@ -1,6 +1,5 @@
 package com.example.monev.ui.screens.chatbot
 
-import MyBottomBar
 import android.app.Activity
 import android.content.Intent
 import android.speech.RecognizerIntent
@@ -8,10 +7,19 @@ import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColor
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -19,25 +27,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.monev.BuildConfig
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
-import com.example.monev.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,7 +130,7 @@ fun ChatbotScreen(navController: NavController) {
                 isProcessing = true
 
                 val userInput = matches[0]
-                val prompt = "Kau adalah seorang developer aplikasi monev. Aplikasi yang bertujuan untuk tunanetra dalam melakukan scan nilai mata uang melalui kamera. Client bertanya: \"$userInput\""
+                val prompt = "Kau adalah seorang developer aplikasi monev. Aplikasi yang bertujuan untuk tunanetra dalam melakukan scan nilai mata uang melalui kamera. Untuk mulai fitur scan, akses kamera bisa dari tombol di tengah layar. untuk akses daftar history juga berada di beranda bagian bawah. Client bertanya: \"$userInput\""
 
                 MainScope().launch {
                     try {
@@ -212,7 +223,7 @@ fun ChatbotScreen(navController: NavController) {
                             )
 
                             MainScope().launch {
-                                delay(2000)
+                                delay(3000)
                                 isListening = true
                                 speechLauncher.launch(speechRecognizerIntent)
                             }

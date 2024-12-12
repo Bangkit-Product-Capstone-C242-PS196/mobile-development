@@ -11,11 +11,9 @@ import com.example.monev.ui.theme.MonevTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
         setContent {
             MonevTheme {
                 Navigation(modifier = Modifier.fillMaxSize())
-//                RegisLoginScreen()
             }
         }
     }

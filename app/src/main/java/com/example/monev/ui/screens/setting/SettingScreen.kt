@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -306,7 +308,14 @@ fun SettingSection(
                         checkedTrackColor = colorScheme.secondaryContainer,
                         uncheckedThumbColor = colorScheme.onSurface,
                         uncheckedTrackColor = colorScheme.surface
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        contentDescription = if (isNotificationEnabled) {
+                            "Notifikasi sedang aktif. klik untuk menonaktifkan"
+                        } else {
+                            "Notifikasi mati. klik untuk mengaktifkan"
+                        }
+                    }
                 )
             }
         )
@@ -370,8 +379,6 @@ fun AccountSection(onSignOut: () -> Unit) {
         modifier = Modifier.clickable(onClick = onSignOut)
     )
 }
-
-
 
 fun showNotification(context: Context) {
     val preferenceManager = PreferenceManager(context)
