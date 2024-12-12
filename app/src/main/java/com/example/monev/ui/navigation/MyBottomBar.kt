@@ -1,4 +1,5 @@
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,9 +32,35 @@ fun MyBottomBar(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val currentDestination = navController.currentBackStackEntryAsState().value
+    val isDarkTheme = isSystemInDarkTheme()
+
+    val colors = if (isDarkTheme) {
+        NavigationBarItemDefaults.colors(
+            selectedIconColor = colorScheme.primary,
+            selectedTextColor = colorScheme.primary,
+            unselectedIconColor = colorScheme.onSurface.copy(alpha = 0.6f),
+            unselectedTextColor = colorScheme.onSurface.copy(alpha = 0.6f),
+            indicatorColor = colorScheme.surfaceVariant
+        )
+
+    } else {
+        NavigationBarItemDefaults.colors(
+            selectedIconColor = colorScheme.onPrimary,
+            selectedTextColor = colorScheme.onPrimary,
+            unselectedIconColor = colorScheme.onBackground.copy(alpha = 0.8f),
+            unselectedTextColor = colorScheme.onBackground.copy(alpha = 0.8f),
+            indicatorColor = colorScheme.primary
+        )
+    }
+
+    val containerColor = if (isSystemInDarkTheme()) {
+        colorScheme.surfaceVariant
+    } else {
+        colorScheme.primary
+    }
 
     NavigationBar(
-        containerColor = colorScheme.surfaceVariant,
+        containerColor = containerColor,
         tonalElevation = 8.dp,
         modifier = Modifier
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
@@ -85,12 +112,7 @@ fun MyBottomBar(
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                     )
                 },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = colorScheme.onSurfaceVariant,
-                    selectedTextColor = colorScheme.primary,
-                    unselectedIconColor = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    unselectedTextColor = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                ),
+                colors = colors,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .animateContentSize()
@@ -99,7 +121,6 @@ fun MyBottomBar(
     }
 }
 
-// Helper data class for navigation items
 data class NavigationItem(
     val route: String,
     val icon: ImageVector,

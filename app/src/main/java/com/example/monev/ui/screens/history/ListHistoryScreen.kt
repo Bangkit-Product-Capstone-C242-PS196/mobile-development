@@ -5,14 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import android.R
-import android.icu.text.SimpleDateFormat
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,7 +45,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.monev.data.model.History
@@ -71,15 +68,15 @@ fun ListHistoryScreen(
 
     // State untuk dropdown menu
     var expandedMonth by remember { mutableStateOf(false) }
-    var selectedMonth by remember { mutableStateOf("All") }
+    var selectedMonth by remember { mutableStateOf("Semua") }
 
     // State untuk dropdown tanggal
     var expandedDate by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf("All") }
+    var selectedDate by remember { mutableStateOf("Semua") }
 
     // Daftar bulan
     val months = listOf(
-        "All", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Semua", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
         "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     )
 
@@ -91,14 +88,14 @@ fun ListHistoryScreen(
         val timestamp = history.date.toLongOrNull() ?: 0L
         val calendar = Calendar.getInstance().apply { timeInMillis = timestamp }
 
-        val matchMonth = if (selectedMonth == "All") {
+        val matchMonth = if (selectedMonth == "Semua") {
             true
         } else {
             val monthNumber = getMonthNumber(selectedMonth)
             calendar.get(Calendar.MONTH) + 1 == monthNumber
         }
 
-        val matchDate = if (selectedDate == "All") {
+        val matchDate = if (selectedDate == "Semua") {
             true
         } else {
             calendar.get(Calendar.DAY_OF_MONTH).toString() == selectedDate
@@ -134,8 +131,6 @@ fun ListHistoryScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Points Card
-//            PointsCard(totalItems = allData.size)
 
             // Header dengan Dropdown Menu untuk Bulan dan Tanggal
             Row(
@@ -157,7 +152,7 @@ fun ListHistoryScreen(
                         Text(text = selectedMonth)
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Dropdown",
+                            contentDescription = "Dropdown filter bulan",
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -179,6 +174,8 @@ fun ListHistoryScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.width(8.dp))
+
                 // Filter Tanggal
                 Box {
                     OutlinedButton(
@@ -193,7 +190,7 @@ fun ListHistoryScreen(
                         Text(text = selectedDate)
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Dropdown",
+                            contentDescription = "Dropdown filter tanggal",
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -223,22 +220,14 @@ fun ListHistoryScreen(
                         horizontalArrangement = Arrangement.End
                     ) {
                         TextButton(onClick = {
-                            selectedMonth = "All"
-                            selectedDate = "All"
+                            selectedMonth = "Semua"
+                            selectedDate = "Semua"
                         }) {
                             Text("Reset Filter")
                         }
                     }
                 }
             }
-
-            // Header Teks
-            Text(
-                text = "Riwayat Scan",
-                color = colorScheme.onBackground,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
 
             // Daftar History
             LazyColumn(
@@ -251,51 +240,6 @@ fun ListHistoryScreen(
                     HistoryItem(history)
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun PointsCard(totalItems: Int) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "Your Points",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = "Star",
-                    tint = Color(0xFFFFC107),
-                    modifier = Modifier.size(24.dp)
-                )
-                Text(
-                    text = "700 points",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-            Text(
-                text = "Latest update: 5 March, 2023",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
         }
     }
 }
@@ -325,6 +269,18 @@ fun HistoryItem(history: History) {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Menampilkan Tanggal
+            val formattedDate = formatDate(history.date)
+            Text(
+                text = " $formattedDate",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .semantics {
+                        contentDescription = "Tanggal : $formattedDate"
+                    }
+            )
+
             // Menampilkan Nominal
             Text(
                 text = "Nominal: ${history.nominal} ",
@@ -336,14 +292,6 @@ fun HistoryItem(history: History) {
                 text = "Confidence: ${"%.2f".format(history.confidence * 100)}%",
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.primary
-            )
-
-            // Menampilkan Tanggal
-            val formattedDate = formatDate(history.date)
-            Text(
-                text = "Tanggal: $formattedDate",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

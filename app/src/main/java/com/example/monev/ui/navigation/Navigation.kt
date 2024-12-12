@@ -1,6 +1,5 @@
 package com.example.monev.ui.navigation
 
-
 import MyBottomBar
 import android.app.Activity.RESULT_OK
 import android.widget.Toast
@@ -8,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -46,7 +44,6 @@ import com.example.monev.viewmodel.auth.SignInViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.animatedComposable(
     route: String,
     content: @Composable (NavBackStackEntry) -> Unit
@@ -82,7 +79,6 @@ fun NavGraphBuilder.animatedComposable(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
@@ -103,9 +99,6 @@ fun Navigation(modifier: Modifier = Modifier) {
         Destinations.SettingScreen.route,
         Destinations.ChatbotScreen.route
     )
-
-    // Cek apakah pengguna sudah login
-    val isUserSignedIn = googleAuthUiClient.getSignedInUser() != null
 
     // State untuk menyimpan rute saat ini
     val currentRoute = remember { mutableStateOf<String?>(null) }

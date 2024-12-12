@@ -40,8 +40,8 @@ fun SplashScreen(
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.img_monev),
-            contentDescription = "Monev Logo",
+            painter = painterResource(id = R.drawable.img_monev_nobg),
+            contentDescription = "Monev - Money Voice Identifier",
             modifier = Modifier
                 .scale(scale.value)
                 .alpha(alpha.value)
